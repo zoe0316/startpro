@@ -11,7 +11,7 @@ if os.name == 'nt':
 setup_args = {
     'name': 'startpro',
     'version': version,
-    'url': 'http://zoe0316.github.io',
+    'url': 'https://github.com/zoe0316/startpro',
     'description': 'build a script project',
     'long_description': open('README.rst').read(),
     'author': 'Zoe Allen',
