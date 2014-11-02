@@ -51,3 +51,5 @@ buildout.cfg
 .ropeproject*
 *.spec
 *.dic
+
+.settings

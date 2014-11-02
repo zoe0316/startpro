@@ -6,7 +6,7 @@ Created on 2014.04.21
 @author: ZoeAllen
 '''
 
-SCRIPT_MODULE = '[SCRIPT_MODULE]'
+SCRIPT_MODULE = '%SCRIPT_MODULE_FLAG%'
 
 COMMAND_MODEULE = 'core.commands'
 

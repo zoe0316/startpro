@@ -48,27 +48,26 @@ def _startpro(opts):
     mod = import_module(MAIN_PATH)
     src = mod.__path__[0]
     dst = os.path.join(root_path, name)
-    shutil.copytree(src, dst, ignore=ignore_patterns('*.pyc'))
-    os.rename(os.path.join(dst, MAIN_PY), os.path.join(dst, "%s.py" % name))
-    if script_name != "script":
-        f = os.path.join(dst, MAIN_SETTING)
-        res = re.sub(r"'[SCRIPT_MODULE]'", "'%s'" % script_name, open(f).read())
-        with open(f, 'w') as setting_f:
-            setting_f.write(res)
-        f = os.path.join(dst, "script")
-        os.rename(f, os.path.join(dst, script_name))
-    f = os.path.join(dst, "package.sh")
-    with open(f, 'w') as sh_f:
-        sh_f.write("python pkg.py %s.py core/commands %s" % (name, script_name))
-    
+    try:
+        shutil.copytree(src, dst, ignore=ignore_patterns('*.pyc', "VERSION"))
+        os.rename(os.path.join(dst, MAIN_PY), os.path.join(dst, "%s.py" % name))
+        if script_name != "script":
+            f = os.path.join(dst, MAIN_SETTING)
+            res = re.sub(r"%SCRIPT_MODULE_FLAG%", "%s" % script_name, open(f).read())
+            with open(f, 'w') as setting_f:
+                setting_f.write(res)
+            f = os.path.join(dst, "script")
+            os.rename(f, os.path.join(dst, script_name))
+        f = os.path.join(dst, "package.sh")
+        with open(f, 'w') as sh_f:
+            sh_f.write("python pkg.py %s.py core/commands %s" % (name, script_name))
+    except OSError:
+        print("[Errno 17] File exists: '%s'" % name)
 
 def execute():
-    
     opts = _get_opts(sys.argv)
     if 'name' not in opts:
         _print_commands()
         print("[WARN]:please type a project name with [-name] option.")
         sys.exit()
     _startpro(opts)
-    
-    

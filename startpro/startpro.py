@@ -7,7 +7,7 @@ import sys
 from common.utils.log4py import log
 import os
 from core import settings
-from startpro.core.utils.opts import get_command, get_opts, load_config, get_attr
+from core.utils.opts import get_command, get_opts, load_config, get_attr
 
 # [LOAD MODULE START]
 import core.commands.start
