@@ -13,8 +13,7 @@ __version__ = pkgutil.get_data(__package__, 'VERSION').strip()
 if not isinstance(__version__, str):
     __version__ = __version__.decode('ascii')
 
-options = {'-name': 'create project name.', 
-           '-script': 'execute module name.',
+options = {'-script': 'execute module name.',
            }
 
 MAIN_PATH = "startpro"
@@ -41,9 +40,9 @@ def _print_commands():
         print("  %-13s %s" % (name, desc))
     print('')
 
-def _startpro(opts):
-    root_path = os.path.dirname(sys.argv[0])
-    name = opts['name']
+def _startpro(name, opts):
+    # root_path = os.path.dirname(sys.argv[0])
+    root_path = os.getcwd()
     script_name = opts.get('script', 'script')
     mod = import_module(MAIN_PATH)
     src = mod.__path__[0]
@@ -51,13 +50,16 @@ def _startpro(opts):
     try:
         shutil.copytree(src, dst, ignore=ignore_patterns('*.pyc', "VERSION"))
         os.rename(os.path.join(dst, MAIN_PY), os.path.join(dst, "%s.py" % name))
-        if script_name != "script":
-            f = os.path.join(dst, MAIN_SETTING)
-            res = re.sub(r"%SCRIPT_MODULE_FLAG%", "%s" % script_name, open(f).read())
-            with open(f, 'w') as setting_f:
-                setting_f.write(res)
-            f = os.path.join(dst, "script")
-            os.rename(f, os.path.join(dst, script_name))
+        try:
+            os.remove(os.path.join(dst, '__init__.py'))
+        except:
+            pass
+        f = os.path.join(dst, MAIN_SETTING)
+        res = re.sub(r"%SCRIPT_MODULE_FLAG%", "%s" % script_name, open(f).read())
+        with open(f, 'w') as setting_f:
+            setting_f.write(res)
+        f = os.path.join(dst, "script")
+        os.rename(f, os.path.join(dst, script_name))
         f = os.path.join(dst, "package.sh")
         with open(f, 'w') as sh_f:
             sh_f.write("python pkg.py %s.py core/commands %s" % (name, script_name))
@@ -66,8 +68,11 @@ def _startpro(opts):
 
 def execute():
     opts = _get_opts(sys.argv)
-    if 'name' not in opts:
+    try:
+        name = sys.argv[1]
+        _startpro(name, opts)
+    except:
         _print_commands()
-        print("[WARN]:please type a project name with [-name] option.")
+        print("[WARN]:please type a project name.")
         sys.exit()
-    _startpro(opts)
+    

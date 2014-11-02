@@ -10,7 +10,6 @@ dist
 build
 eggs
 parts
-bin
 var
 sdist
 develop-eggs
@@ -36,16 +35,10 @@ nosetests.xml
 .pydevproject
 
 # log
-.log
+*.log
 
 # pid
-.pid
-
-log
-
-# for hunterpy
-result_file
-buildout.cfg
+*.pid
 
 # for .ropeproject
 .ropeproject*
