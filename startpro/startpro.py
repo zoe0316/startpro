@@ -1,17 +1,17 @@
 # encoding: utf-8
 
 '''
-@author: Your Name
+@author: Allen
 '''
 import sys
-from common.utils.log4py import log
+from startpro.common.utils.log4py import log
 import os
-from core import settings
-from core.utils.opts import get_command, get_opts, load_config, get_attr
+from startpro.core import settings
+from startpro.core.utils.opts import get_command, get_opts, load_config, get_attr
 
 # [LOAD MODULE START]
-import core.commands.start
-import core.commands.list
+import startpro.core.commands.start
+import startpro.core.commands.list
 # [LOAD MODULE END]
 
 reload(sys)

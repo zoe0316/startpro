@@ -3,11 +3,11 @@
 '''
 Created on 2014.05.26
 
-@author: ZoeAllen
+@author: Allen
 '''
 import sys
-from core.topcmd import TopCommand
-from core.utils.opts import get_script
+from startpro.core.topcmd import TopCommand
+from startpro.core.utils.opts import get_script
 
 class Command(TopCommand):
     '''
@@ -20,7 +20,7 @@ class Command(TopCommand):
         '''
         
     def run(self, **kwargvs):
-        scripts = get_script()
+        scripts = get_script(kwargvs.get('paths'))
         script_name = str(sys.argv[2])
         if not scripts.has_key(script_name):
             print('[INFO]:Unsupported script.')

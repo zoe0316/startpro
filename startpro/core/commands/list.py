@@ -3,10 +3,10 @@
 '''
 Created on 2014年.05.26
 
-@author: ZoeAllen
+@author: Allen
 '''
-from core.topcmd import TopCommand
-from core.utils.opts import get_script
+from startpro.core.topcmd import TopCommand
+from startpro.core.utils.opts import get_script
 
 class Command(TopCommand):
     '''
@@ -20,6 +20,6 @@ class Command(TopCommand):
         
     def run(self, **kwargvs):
         print('[INFO]:script list:')
-        for k in sorted(get_script().keys()):
+        for k in sorted(get_script(kwargvs.get('paths')).keys()):
             print('----> %s' % k)
         

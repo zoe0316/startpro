@@ -3,7 +3,7 @@
 '''
 Created on 2014.04.21
 
-@author: ZoeAllen
+@author: Allen
 '''
 
 class TopCommand():
@@ -19,4 +19,9 @@ class TopCommand():
         
     def run(self, **kwargvs):
         raise NotImplementedError
-        
+    
+    def help(self, **kwargvs):
+        '''
+        print help info.
+        '''
+        pass

@@ -3,12 +3,13 @@
 '''
 Created on 2014.04.21
 
-@author: ZoeAllen
+@author: Allen
 '''
+import os
 
-SCRIPT_MODULE = '%SCRIPT_MODULE_FLAG%'
+COMMAND_MODEULE = 'startpro.core.commands'
 
-COMMAND_MODEULE = 'core.commands'
+SCRIPT_MODULE = ''
 
 # PROGRAM BASE INFO
 VERSION = ''
@@ -21,4 +22,9 @@ ROOT_PATH = ''
 CLIENT_FILE = 'client_file'
 RESULT_FILE = 'result_file'
 CONFIG_FILE = 'config.ini'
+
+MAIN_PATH = "startpro"
+MAIN_PY = 'startpro.py'
+MAIN_SETTING = os.path.join('core', 'settings.py')
+MAIN_CONFIG = "startpro.cfg"
 

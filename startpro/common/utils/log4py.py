@@ -1,6 +1,6 @@
 '''
 Created on 2013.03.20
-@author: ZoeAllen
+@author: Allen
 '''
 import time
 import smtplib

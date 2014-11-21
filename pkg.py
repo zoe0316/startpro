@@ -3,7 +3,7 @@
 '''
 Created on 2014.06.24
 
-@author: Allen
+@author: ZoeAllen
 '''
 import os
 from importlib import import_module

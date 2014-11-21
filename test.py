@@ -1,3 +1,2 @@
-from startpro import execute
-
+from startpro import execute  # @UnresolvedImport
 execute()

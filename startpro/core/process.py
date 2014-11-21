@@ -3,7 +3,7 @@
 '''
 Created on 2014.06.23
 
-@author: ZoeAllen
+@author: Allen
 '''
 
 class Process(object):

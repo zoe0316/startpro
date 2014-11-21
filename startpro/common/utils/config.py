@@ -1,5 +1,9 @@
 #-*- encoding: utf-8 -*-
+'''
+Created on 2014年.05.26
 
+@author: Allen
+'''
 import ConfigParser
 import os
 
@@ -35,8 +39,11 @@ class Config():
     def get_config(self, section, option):
         configVal = ""
         try:
-            if self.config.has_section(section):
-                configVal = self.config.get(section, option)
+            if not self.config.has_section(section):
+                return configVal
+            if not self.config.has_option(section, option):
+                return configVal
+            configVal = self.config.get(section, option)
         except Exception, e:
             print ("Warn:get_config error.%s" % e)
             return ''

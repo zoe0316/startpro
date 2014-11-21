@@ -3,15 +3,15 @@
 '''
 Created on 2014.04.16
 
-@author: ZoeAllen
+@author: Allen
 '''
 from importlib import import_module
 from inspect import isclass, ismodule, isfunction
-from core import settings
-from core.process import Process
-from core.topcmd import TopCommand
-from common.utils.config import Config
-from common.utils.log4py import log
+from startpro.core import settings
+from startpro.core.process import Process
+from startpro.core.topcmd import TopCommand
+from startpro.common.utils.config import Config
+import os
 
 def get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
@@ -21,13 +21,25 @@ def get_opts(argv):
         argv = argv[1:]  # Reduce the argument list by copying it starting from index 1.
     return opts
 
+def load_modeule_auto(root_path, scan_paths):
+    for p in scan_paths:
+        for root, _, files in os.walk(import_module(p).__path__[0]):
+            for f in files:
+                if f.startswith("__") or f.endswith("pyc") or not f.endswith(".py"):
+                    continue
+                f = os.path.join(root, f)
+                f = f.replace(root_path, "").split(os.path.sep)
+                module_path = ".".join(f)
+                if module_path.startswith("."):
+                    module_path = module_path[ 1: -3 ]
+                import_module(module_path)
+
 def load_module(module_path):
     '''
     Return: [module object] list
     module_path : argument required, package path
     
-    when module in this package starts with settings.COMMAND_MODEULE
-    when module in this package starts with settings.SCRIPT_MODULE
+    when module in this package starts with settings.COMMAND_MODEULE / settings.SCRIPT_MODULE
     and not inner attribute
     '''
     mods = []
@@ -64,27 +76,30 @@ def __scan_mod(path):
                     res.append( (func_name, item) )
     return res
     
-def get_script():
+def get_script(paths):
     '''
     Return: dict of executable script name 
     '''
     mapping = {}
-    for re in __scan_mod(settings.SCRIPT_MODULE):
-        mapping[".".join(re[0].split(".")[ 1 : ])] = re[1] 
+    for p in paths:
+        for re in __scan_mod(p):
+            # mapping[".".join(re[0].split(".")[ 1 : ])] = re[1]
+            mapping[re[0]] = re[1]
     return mapping
 
-def get_command():
+def get_command(paths):
     '''
     Return: dict of commands 
     '''
     mapping = {}
-    for mod in load_module(settings.COMMAND_MODEULE):
-        for item in dir(mod):
-            if item == 'TopCommand':
-                continue
-            item = getattr(mod, item)
-            if isclass(item) and issubclass(item, TopCommand):
-                mapping[ mod.__name__.split('.')[-1] ] = item()
+    for p in paths:
+        for mod in load_module(p):
+            for item in dir(mod):
+                if item == 'TopCommand':
+                    continue
+                item = getattr(mod, item)
+                if isclass(item) and issubclass(item, TopCommand):
+                    mapping[ mod.__name__.split('.')[-1] ] = item()
     return mapping
 
 def load_config(config_file, section):
