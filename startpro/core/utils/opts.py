@@ -13,15 +13,19 @@ from startpro.core.topcmd import TopCommand
 from startpro.common.utils.config import Config
 import os
 
-def get_opts(argv):
+def _get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
     while argv:  # While there are arguments left to parse...
         if argv[0][0] == '-':  # Found a "-name value" pair.
-            opts[argv[0][1:]] = argv[1]  # Add key and value to the dictionary.
+            if len(argv) > 1:
+                opts[argv[0][1:]] = argv[1]  # Add key and value to the dictionary.
+            else:
+                opts[argv[0][1:]] = None
         argv = argv[1:]  # Reduce the argument list by copying it starting from index 1.
     return opts
 
 def load_modeule_auto(root_path, scan_paths):
+    paths = set()
     for p in scan_paths:
         for root, _, files in os.walk(import_module(p).__path__[0]):
             for f in files:
@@ -32,9 +36,11 @@ def load_modeule_auto(root_path, scan_paths):
                 module_path = ".".join(f)
                 if module_path.startswith("."):
                     module_path = module_path[ 1: -3 ]
+                paths.add(module_path)
                 import_module(module_path)
+    return list(paths)
 
-def load_module(module_path):
+def load_module(module_path, match=""):
     '''
     Return: [module object] list
     module_path : argument required, package path
@@ -44,11 +50,19 @@ def load_module(module_path):
     '''
     mods = []
     if module_path:
-        mod = import_module(module_path)
-        for module in dir(mod):
-            if module_path.startswith(settings.COMMAND_MODEULE) or module_path.startswith(settings.SCRIPT_MODULE):
+        try:
+            print module_path
+            # match
+            
+            mod = import_module(module_path)
+            for module in dir(mod):
+                # if module_path.startswith(settings.COMMAND_MODEULE) or module_path.startswith(settings.SCRIPT_MODULE):
                 if not module.startswith('__'):
                     mods.append(import_module("%s.%s" % (module_path, module)))
+            print mods
+            print
+        except Exception, e:
+            print e
     return mods
 
 def __scan_mod(path):
@@ -71,20 +85,22 @@ def __scan_mod(path):
             elif ismodule(item):
                 res.extend(__scan_mod(item.__package__))
             else:
-                if isfunction(item) and item.__name__.startswith('run') and mod.__name__.startswith(settings.SCRIPT_MODULE):
+                if isfunction(item) and item.__name__.startswith('run'):
                     func_name = "%s.%s" % (mod.__name__, item.__name__)
                     res.append( (func_name, item) )
     return res
     
-def get_script(paths):
+def get_script(paths, full=False):
     '''
     Return: dict of executable script name 
     '''
     mapping = {}
     for p in paths:
         for re in __scan_mod(p):
-            # mapping[".".join(re[0].split(".")[ 1 : ])] = re[1]
-            mapping[re[0]] = re[1]
+            if full:
+                mapping[re[0]] = re[1]
+            else:
+                mapping[".".join(re[0].split(".")[ 1 : ])] = re[1]
     return mapping
 
 def get_command(paths):

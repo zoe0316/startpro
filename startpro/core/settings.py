@@ -23,8 +23,17 @@ CLIENT_FILE = 'client_file'
 RESULT_FILE = 'result_file'
 CONFIG_FILE = 'config.ini'
 
+# MAIN PATH CONFIGURE
 MAIN_PATH = "startpro"
 MAIN_PY = 'startpro.py'
 MAIN_SETTING = os.path.join('core', 'settings.py')
 MAIN_CONFIG = "startpro.cfg"
+
+# TEMPLATE FILE
+TEMPLATE = "template"
+TEMPLATE_PACKAGE = os.path.join(TEMPLATE, "package.py")
+
+# LOAD PATHS
+LOAD_PATHS = '#LOAD_PATHS#'
+
 

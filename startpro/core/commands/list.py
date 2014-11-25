@@ -20,6 +20,6 @@ class Command(TopCommand):
         
     def run(self, **kwargvs):
         print('[INFO]:script list:')
-        for k in sorted(get_script(kwargvs.get('paths')).keys()):
+        for k in sorted(get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False))).keys()):
             print('----> %s' % k)
         
