@@ -12,16 +12,109 @@ pip install startpro
 
 ### Usage
 
-* build a project
-
 ```shell
-startpro test_py
+startpro command [-options] [option_value]
+
+Available command:
+  create
+  list
+  pkg
+  start
 ```
 
-* build a project with custom executable module name
+#### Help
+
 ```shell
-startpro test_py -script [module name]
+startpro [command] -help
 ```
 
+#### Build a project
+
+```shell
+startpro cretae -name pro
+```
+
+#### Settings
+
+```shell
+cd pro
+
+vim startpro.cfg
+
+# [settings]
+# default = 'execute module match pattern name'
+# [package]
+# name = 'package main process name'
+
+```
+
+##### Example
+```shell
+➜ startpro create -name pro
+➜ cd pro
+➜ mkdir script
+➜ touch script/__init__.py
+➜ vim script/test.py
+➜ startpro list
+  [INFO]:script list:
+  ----> test.run
+➜ startpro start test.run
+  {'paths': ['script'], 'load_paths': ['script.test']}
+
+```
+
+test.py (function)
+
+function name startswith "run":
+
+```python
+def run(**k):
+	print k
+```
+or
+
+class extends Process & has attribute "name"
+and overwrite:
+```python
+def run(self, **kwargvs):
+        raise NotImplementedError
+```
+
+test.py (class)
+
+```python
+# encoding: utf8
+from startpro.core.process import Process
+
+class Test(Process):
+
+	name = "testpro"
+
+	def __init__(self):
+		pass
+
+	def run(self, **k):
+		print k
+```
+
+#### Start a program
+```shell
+➜ startpro list
+  [INFO]:script list:
+  ----> testpro
+➜ startpro start testpro
 ...
+```
+
+#### Package
+```shell
+➜ startpro pkg -name pro
+➜ ./dist/pro list
+  [INFO]:script list:
+  ----> testpro
+➜ ./dist/pro start testpro
+
+```
+
+
 
