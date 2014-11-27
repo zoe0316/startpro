@@ -100,11 +100,8 @@ def _start(root_path):
         print(e)
 
 def pkg_run(curr_path, opts):
-#     scan_paths = json.loads(__path__)
-#     for p in scan_paths:
-#         print import_module(p).__path__
     match = _start(curr_path)
-    print curr_path
+    # print curr_path
     paths = settings.CONFIG.get_config("package", "load")
     paths = json.loads(paths.replace("'", '"'))
     # load_paths = load_modeule_auto("", paths)
@@ -144,7 +141,6 @@ def execute(pkg=False):
             if "help" in opts or "-help" in opts:
                 func.help(**opts)
                 return
-            print opts
             func.run(**opts)
         else:
             _print_commands(cmds)
@@ -154,4 +150,5 @@ def execute(pkg=False):
         print(msg)
         _print_commands(cmds)
     finally:
-        raw_input("hi:")
+        # raw_input("hi:")
+        pass

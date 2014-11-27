@@ -12,7 +12,7 @@ import os
 from startpro.core import settings
 import shutil
 
-options = {'-name': "project name"}
+options = {'-name': "main package name"}
 
 SPEC_CONTENT='''
 # -*- mode: python -*-
@@ -84,6 +84,8 @@ class Command(TopCommand):
                 f.flush()
             os.system("pyinstaller -F %s" % spec)
             settings.CONFIG.remove_option("package", "load")  # @UndefinedVariable
+            os.remove(spec)
+            print("[INFO]:package:[%s]" % os.path.join(os.path.join(PATHEX, "dist"), PKG_NAME))
         except Exception, e:
             print("[ERROR]:%s" % e)
         

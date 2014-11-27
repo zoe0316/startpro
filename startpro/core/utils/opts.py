@@ -12,6 +12,7 @@ from startpro.core.process import Process
 from startpro.core.topcmd import TopCommand
 from startpro.common.utils.config import Config
 import os
+import re
 
 def _get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
@@ -51,16 +52,19 @@ def load_module(module_path, match=""):
     mods = []
     if module_path:
         try:
-            print module_path
             # match
-            
+            match = [settings.COMMAND_MODEULE]
+            config = settings.CONFIG
+            if config:
+                match.append(config.get_config('settings', 'default'))  # @UndefinedVariable
+            p = re.compile( "|".join([ "\A%s" % r for r in match ]) )
+            if not p.match(module_path):
+                return mods
             mod = import_module(module_path)
             for module in dir(mod):
                 # if module_path.startswith(settings.COMMAND_MODEULE) or module_path.startswith(settings.SCRIPT_MODULE):
                 if not module.startswith('__'):
                     mods.append(import_module("%s.%s" % (module_path, module)))
-            print mods
-            print
         except Exception, e:
             print e
     return mods
