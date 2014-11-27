@@ -8,6 +8,7 @@ scripts = ['bin/startpro']
 if os.name == 'nt':
     scripts.append('bin/startpro.bat')
 
+
 setup_args = {
     'name': 'startpro',
     'version': version,
@@ -32,6 +33,15 @@ setup_args = {
         'Topic :: Software Development :: Libraries :: Python Modules',
     ]
 }
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+else:
+    setup_args['install_requires'] = [
+        'pyinstaller>=2.1',
+    ]
 
 setup(
     packages = find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
