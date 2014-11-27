@@ -48,7 +48,7 @@ vim startpro.cfg
 
 ```
 
-##### Example
+#### Example
 ```shell
 ➜ startpro create -name pro
 ➜ cd pro
