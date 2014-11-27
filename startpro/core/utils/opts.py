@@ -102,7 +102,7 @@ def get_script(paths, full=False):
     mapping = {}
     for p in paths:
         for re in __scan_mod(p):
-            if full:
+            if full or re[0].find(".") < 0:
                 mapping[re[0]] = re[1]
             else:
                 mapping[".".join(re[0].split(".")[ 1 : ])] = re[1]

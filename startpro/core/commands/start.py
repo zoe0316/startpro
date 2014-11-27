@@ -9,6 +9,8 @@ import sys
 from startpro.core.topcmd import TopCommand
 from startpro.core.utils.opts import get_script
 
+options = {"-full": "if need full path name of script"}
+
 class Command(TopCommand):
     '''
     classdocs
@@ -30,6 +32,13 @@ class Command(TopCommand):
             return
         func = scripts.get(script_name)
         func(**kwargvs)
+        
+    def help(self, **kwargvs):
+        print('Start a program.')
+        print('')
+        print("Available options:")
+        for name, desc in sorted(options.iteritems()):
+            print("  %-13s %s" % (name, desc))
         
         
         
