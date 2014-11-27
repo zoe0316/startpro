@@ -56,7 +56,7 @@ def load_module(module_path, match=""):
             match = [settings.COMMAND_MODEULE]
             config = settings.CONFIG
             if config:
-                match.append(config.get_config('settings', 'default'))  # @UndefinedVariable
+                match.extend(config.get_config('settings', 'default').split(","))  # @UndefinedVariable
             p = re.compile( "|".join([ "\A%s" % r for r in match ]) )
             # if not match commands or main scripts
             if not p.match(module_path):
