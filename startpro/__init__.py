@@ -1,5 +1,11 @@
 # encoding: utf-8
 
+'''
+Created on 2014.05.26
+
+@author: Allen
+'''
+
 import os
 import sys
 import re
@@ -25,7 +31,7 @@ import json
 
 __version__ = pkgutil.get_data(__package__, 'VERSION').strip()
 if not isinstance(__version__, str):
-    __version__ = __version__.decode('ascii')
+    __version__ = __version__.decode('utf8')
 
 
 def _print_header():

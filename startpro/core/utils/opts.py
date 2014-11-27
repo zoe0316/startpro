@@ -58,6 +58,7 @@ def load_module(module_path, match=""):
             if config:
                 match.append(config.get_config('settings', 'default'))  # @UndefinedVariable
             p = re.compile( "|".join([ "\A%s" % r for r in match ]) )
+            # if not match commands or main scripts
             if not p.match(module_path):
                 return mods
             mod = import_module(module_path)
