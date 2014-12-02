@@ -62,7 +62,7 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
             self.buffer = []
             
     def mailNotification(self, subject, content):
-        if MAIL_TO and MAIL_UN and MAIL_PW:
+        if MAIL_TO and MAIL_UN and MAIL_PW and MAIL_HOST:
             """
             """
             msg = MIMEText(content)
@@ -95,13 +95,14 @@ class Log:
         log_file = os.path.join(log_path, log_file)
         self.config(log_file, FILE_LOG_LEVEL, CONSOLE_LOG_LEVEL, MEMOEY_LOG_LEVEL, URGENT_LOG_LEVEL)
     
-    def set_mail(self, mail_un, mail_pw):
+    def set_mail(self, mail_un, mail_pw, mail_host):
         '''
         set mail server configure
         '''
-        global MAIL_UN, MAIL_PW
+        global MAIL_UN, MAIL_PW, MAIL_HOST
         MAIL_UN = mail_un
         MAIL_PW = mail_pw
+        MAIL_HOST = mail_host
     
     def set_mailto(self, mail_to):
         '''
