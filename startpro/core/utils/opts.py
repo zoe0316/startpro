@@ -13,6 +13,7 @@ from startpro.core.topcmd import TopCommand
 from startpro.common.utils.config import Config
 import os
 import re
+import functools
 
 def _get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
@@ -140,3 +141,13 @@ def get_attr(attr_name, default=None):
         return getattr(settings, attr_name.upper())
     else:
         return default
+    
+def safe_run(func):
+    @functools.wraps(func)
+    def _deco(*args, **kvargs):
+        try:
+            func(**kvargs)
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt.")
+            return True
+    return _deco
