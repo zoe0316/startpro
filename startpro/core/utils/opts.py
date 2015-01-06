@@ -31,15 +31,18 @@ def load_modeule_auto(root_path, scan_paths):
     for p in scan_paths:
         for root, _, files in os.walk(import_module(p).__path__[0]):
             for f in files:
-                if f.startswith("__") or f.endswith("pyc") or not f.endswith(".py"):
-                    continue
-                f = os.path.join(root, f)
-                f = f.replace(root_path, "").split(os.path.sep)
-                module_path = ".".join(f)
-                if module_path.startswith("."):
-                    module_path = module_path[ 1: -3 ]
-                paths.add(module_path)
-                import_module(module_path)
+                try:
+                    if f.startswith("__") or f.endswith("pyc") or not f.endswith(".py"):
+                        continue
+                    f = os.path.join(root, f)
+                    f = f.replace(root_path, "").split(os.path.sep)
+                    module_path = ".".join(f)
+                    if module_path.startswith("."):
+                        module_path = module_path[ 1: -3 ]
+                    paths.add(module_path)
+                    import_module(module_path)
+                except Exception, e:
+                    print("load:[%s], %s" % (module_path, e))
     return list(paths)
 
 def load_module(module_path, match=""):
@@ -68,7 +71,7 @@ def load_module(module_path, match=""):
                 if not module.startswith('__'):
                     mods.append(import_module("%s.%s" % (module_path, module)))
         except Exception, e:
-            print e
+            print "load_module:%s" % e
     return mods
 
 def __scan_mod(path):
@@ -83,17 +86,20 @@ def __scan_mod(path):
     res = []
     for mod in load_module(path):
         for item in dir(mod):
-            item = getattr(mod, item)
-            if isclass(item) and issubclass(item, Process):
-                cls = item()
-                if hasattr(cls, 'name'):
-                    res.append( (cls.name, cls.run) )
-            elif ismodule(item):
-                res.extend(__scan_mod(item.__package__))
-            else:
-                if isfunction(item) and item.__name__.startswith('run'):
-                    func_name = "%s.%s" % (mod.__name__, item.__name__)
-                    res.append( (func_name, item) )
+            try:
+                item = getattr(mod, item)
+                if isclass(item) and issubclass(item, Process):
+                    cls = item()
+                    if hasattr(cls, 'name'):
+                        res.append( (cls.name, cls.run) )
+                elif ismodule(item):
+                    res.extend(__scan_mod(item.__package__))
+                else:
+                    if isfunction(item) and item.__name__.startswith('run'):
+                        func_name = "%s.%s" % (mod.__name__, item.__name__)
+                        res.append( (func_name, item) )
+            except:
+                pass
     return res
     
 def get_script(paths, full=False):
