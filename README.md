@@ -29,6 +29,10 @@ from startpro.common.utils.log4py import log
 from startpro.core.utils.loader import safe_init_run
 from startpro.core.utils.loader import get_settings
 
+@safe_init_run
+def run(**kw):
+	pass
+
 ```
 1. Add safe init run model
 2. Add log config for mail service in config.ini (safe_init_run model only).
