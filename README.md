@@ -22,6 +22,29 @@ Available command:
   start
 ```
 
+#### New Features*
+
+```shell
+from startpro.common.utils.log4py import log
+from startpro.core.utils.loader import safe_init_run
+from startpro.core.utils.loader import get_settings
+
+```
+1. Add safe init run model
+2. Add log config for mail service in config.ini (safe_init_run model only).
+```shell
+[common]
+mail_to = 
+mail_un = 
+mail_pw = 
+mail_host = 
+
+# custom config
+# [test]
+# lol = LOL
+```
+
+
 #### Help
 
 ```shell
