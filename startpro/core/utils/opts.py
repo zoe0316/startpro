@@ -10,10 +10,9 @@ from inspect import isclass, ismodule, isfunction
 from startpro.core import settings
 from startpro.core.process import Process
 from startpro.core.topcmd import TopCommand
-from startpro.common.utils.config import Config
 import os
 import re
-import functools
+
 
 def _get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
@@ -130,30 +129,3 @@ def get_command(paths):
                     mapping[ mod.__name__.split('.')[-1] ] = item()
     return mapping
 
-def load_config(config_file, section):
-    '''
-    load custom configure by section
-    '''
-    config = Config(config_file=config_file)
-    settings.CONFIG = config
-    for re in config.get_config_list(section):
-        setattr(settings, re[0].upper(), re[1])
-
-def get_attr(attr_name, default=None):
-    '''
-    get attribute of startpro.core.settings safety default value
-    '''
-    if hasattr(settings, attr_name.upper()):
-        return getattr(settings, attr_name.upper())
-    else:
-        return default
-    
-def safe_run(func):
-    @functools.wraps(func)
-    def _deco(*args, **kvargs):
-        try:
-            func(**kvargs)
-        except KeyboardInterrupt:
-            print("KeyboardInterrupt.")
-            return True
-    return _deco

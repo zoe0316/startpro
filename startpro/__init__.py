@@ -143,7 +143,7 @@ def execute(pkg=False):
                     if not pkg_run(__path__[0], opts): return
                 else:
                     if not normal_run(curr_path, opts): return 
-            if "help" in opts or "-help" in opts:
+            if "help" in opts or "-help" in opts or "--help" in opts:
                 func.help(**opts)
                 return
             func.run(**opts)
@@ -153,7 +153,3 @@ def execute(pkg=False):
         s = sys.exc_info()
         msg = u'[ERROR]:execute [%s] happened on line %d' % (s[1], s[2].tb_lineno)
         print(msg)
-        _print_commands(cmds)
-    finally:
-        # raw_input("hi:")
-        pass
