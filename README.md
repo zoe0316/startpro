@@ -35,7 +35,7 @@ def run(**kw):
 
 ```
 1. Add safe init run model
-2. Add log config for mail service in config.ini (safe_init_run model only).
+2. Add log config for mail service in config.ini (safe_init_run model only),if the log error logging more than 50, it will be sent to your e-mail.
 ```shell
 [common]
 mail_to = 
