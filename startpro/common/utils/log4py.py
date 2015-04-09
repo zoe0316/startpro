@@ -20,7 +20,9 @@ URGENT_LOG_LEVEL = logging.CRITICAL
 host = socket.gethostname()
 
 ERROR_MAIL_SUBJECT = "%s:Too many errors occurred during the execution" % host
+
 ERROR_MESSAGE = 50
+
 CRITICAL_MAIL_SUBJECT = "%s:Fatal error occurred" % host
 
 # mail configure
@@ -114,7 +116,11 @@ class Log:
         elif isinstance(mail_to, list):
             MAIL_TO = mail_to
         else:
-            pass    
+            pass
+        
+    def set_error_limit(self, limit=50):
+        global ERROR_MESSAGE
+        ERROR_MESSAGE = limit
     
     def config(self, logFile, file_level, console_level, memory_level, urgent_level):
         # logger configure

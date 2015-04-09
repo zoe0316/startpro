@@ -28,6 +28,9 @@ import core.commands.pkg
 
 import json
 
+reload(sys)
+sys.setdefaultencoding('utf8')  # @UndefinedVariable
+
 __version__ = pkgutil.get_data(__package__, 'VERSION').strip()
 if not isinstance(__version__, str):
     __version__ = __version__.decode('utf8')
