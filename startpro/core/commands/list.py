@@ -23,9 +23,8 @@ class Command(TopCommand):
         
     def run(self, **kwargvs):
         print('[INFO]:script list:')
-        for k in sorted(get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False))).keys()):
-            print('----> %s' % k)
-    
+        for i, k in enumerate(sorted(get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False))).keys())):
+            print('----> %d: %s' % (i, k))
     def help(self, **kwargvs):
         print('Lists all program.')
         print('')
