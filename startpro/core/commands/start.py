@@ -6,6 +6,7 @@ Created on 2014.05.26
 @author: Allen
 '''
 import sys
+import re
 from startpro.core.topcmd import TopCommand
 from startpro.core.utils.opts import get_script
 
@@ -28,8 +29,12 @@ class Command(TopCommand):
         scripts = get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False)))
         script_name = str(sys.argv[2])
         if not scripts.has_key(script_name):
-            print('[INFO]:Unsupported script.')
-            return
+            try:
+                n = int(script_name)
+                script_name = sorted(scripts.keys())[n]
+            except:
+                print('[INFO]:Unsupported script.')
+                return
         func = scripts.get(script_name)
         func(**kwargvs)
         

@@ -84,8 +84,10 @@ vim startpro.cfg
 ➜ vim script/test.py
 ➜ startpro list
   [INFO]:script list:
-  ----> test.run
+  ----> 0: test.run
 ➜ startpro start test.run
+  {'paths': ['script'], 'load_paths': ['script.test']}
+➜ startpro start 0 # use number instead of function name(to type faster)
   {'paths': ['script'], 'load_paths': ['script.test']}
 
 ```
@@ -128,8 +130,9 @@ class Test(Process):
 ```shell
 ➜ startpro list
   [INFO]:script list:
-  ----> testpro
+  ----> 0: testpro
 ➜ startpro start testpro
+➜ startpro start 0 # use number instead of function name(to type faster)
 ...
 ```
 
@@ -138,7 +141,7 @@ class Test(Process):
 ➜ startpro pkg -name pro
 ➜ ./dist/pro list
   [INFO]:script list:
-  ----> testpro
+  ----> 0: testpro
 ➜ ./dist/pro start testpro
 
 ```
