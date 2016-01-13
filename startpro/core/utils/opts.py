@@ -1,17 +1,21 @@
-#-*- encoding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 
-'''
+"""
 Created on 2014.04.16
 
 @author: Allen
-'''
+"""
+from collections import OrderedDict
 from importlib import import_module
 from inspect import isclass, ismodule, isfunction
+import json
+import os
+import re
+import sys
+
 from startpro.core import settings
 from startpro.core.process import Process
 from startpro.core.topcmd import TopCommand
-import os
-import re
 
 
 def _get_opts(argv):
@@ -25,7 +29,8 @@ def _get_opts(argv):
         argv = argv[1:]  # Reduce the argument list by copying it starting from index 1.
     return opts
 
-def load_modeule_auto(root_path, scan_paths):
+
+def load_module_auto(root_path, scan_paths):
     paths = set()
     for p in scan_paths:
         for root, _, files in os.walk(import_module(p).__path__[0]):
@@ -37,21 +42,22 @@ def load_modeule_auto(root_path, scan_paths):
                     f = f.replace(root_path, "").split(os.path.sep)
                     module_path = ".".join(f)
                     if module_path.startswith("."):
-                        module_path = module_path[ 1: -3 ]
+                        module_path = module_path[1: -3]
                     paths.add(module_path)
                     import_module(module_path)
                 except Exception, e:
                     print("load:[%s], %s" % (module_path, e))
     return list(paths)
 
+
 def load_module(module_path, match=""):
-    '''
+    """
     Return: [module object] list
     module_path : argument required, package path
-    
+
     when module in this package starts with settings.COMMAND_MODEULE / settings.SCRIPT_MODULE
     and not inner attribute
-    '''
+    """
     mods = []
     if module_path:
         try:
@@ -60,7 +66,7 @@ def load_module(module_path, match=""):
             config = settings.CONFIG
             if config:
                 match.extend(config.get_config('settings', 'default').split(","))  # @UndefinedVariable
-            p = re.compile( "|".join([ "\A%s" % r for r in match ]) )
+            p = re.compile("|".join(["\A%s" % r for r in match]))
             # if not match commands or main scripts
             if not p.match(module_path):
                 return mods
@@ -70,18 +76,19 @@ def load_module(module_path, match=""):
                 if not module.startswith('__'):
                     mods.append(import_module("%s.%s" % (module_path, module)))
         except Exception, e:
-            print "load_module:%s" % e
+            print("load_module:%s" % e)
     return mods
 
+
 def __scan_mod(path):
-    '''
-    Return: [(name, class or function) ] list of tuple
+    """
+    Return: [{'name': cls.name, 'func': cls.run, 'is_class': True, 'path': item.__module__}] list of dict
     path : argument required, package path
-    
+
     each package path
     when module in this package is subclass of executable class Process,
     when module in this package starts with 'run'
-    '''
+    """
     res = []
     for mod in load_module(path):
         for item in dir(mod):
@@ -90,34 +97,41 @@ def __scan_mod(path):
                 if isclass(item) and issubclass(item, Process):
                     cls = item()
                     if hasattr(cls, 'name'):
-                        res.append( (cls.name, cls.run) )
+                        res.append({'name': cls.name, 'func': cls.run, 'is_class': True, 'path': item.__module__})
+                        # res.append((cls.name, cls.run, True, item.__module__))
                 elif ismodule(item):
                     res.extend(__scan_mod(item.__package__))
                 else:
                     if isfunction(item) and item.__name__.startswith('run'):
                         func_name = "%s.%s" % (mod.__name__, item.__name__)
-                        res.append( (func_name, item) )
-            except:
-                pass
+                        res.append({'name': func_name, 'func': item, 'is_class': False, 'path': mod.__name__})
+                        # res.append((func_name, item, False, mod.__name__))
+            except Exception, e:
+                print("scan_mod:%s" % e)
     return res
-    
+
+
 def get_script(paths, full=False):
-    '''
-    Return: dict of executable script name 
-    '''
+    """
+    Return: dict of executable script name
+    """
     mapping = {}
     for p in paths:
-        for re in __scan_mod(p):
-            if full or re[0].find(".") < 0:
-                mapping[re[0]] = re[1]
+        for r in __scan_mod(p):
+            name = r.get('name')
+            if full or name.find(".") < 0 or r.get('is_class'):
+                mapping[name] = r
             else:
-                mapping[".".join(re[0].split(".")[ 1 : ])] = re[1]
+                mapping[".".join(name.split(".")[1:])] = r
+    # save script list to temp file
+    save_script_temp(mapping)
     return mapping
 
+
 def get_command(paths):
-    '''
-    Return: dict of commands 
-    '''
+    """
+    Return: dict of commands
+    """
     mapping = {}
     for p in paths:
         for mod in load_module(p):
@@ -126,6 +140,66 @@ def get_command(paths):
                     continue
                 item = getattr(mod, item)
                 if isclass(item) and issubclass(item, TopCommand):
-                    mapping[ mod.__name__.split('.')[-1] ] = item()
+                    mapping[mod.__name__.split('.')[-1]] = item()
     return mapping
 
+
+def save_script_temp(mapping):
+    """
+    save script list to temp file
+    :param res:
+    :return:
+    """
+    try:
+        path = os.path.join(os.getcwd(), '.scripts.tmp')
+        with(open(path, 'w+')) as tmp_file:
+            for k in sorted(mapping.keys()):
+                v = mapping.get(k)
+                v['name'] = k
+                try:
+                    del v['func']
+                except:
+                    pass
+                tmp_file.write('%s\n' % (json.dumps(v)))
+            tmp_file.flush()
+    except:
+        s = sys.exc_info()
+        print('ERROR:save_script_temp %s on line %d' % (s[1], s[2].tb_lineno))
+
+
+def load_script_temp():
+    """
+    when load script return none
+    should we auto create a script temp file? just remind user to manual execute `startpro list`
+    :return:
+    """
+    path = os.path.join(os.getcwd(), '.scripts.tmp')
+    if not os.path.exists(path):
+        return
+    scripts = OrderedDict()
+    with(open(path)) as tmp_file:
+        for line in tmp_file:
+            line = line.strip()
+            if not line:
+                continue
+            line = json.loads(line)
+            scripts[line.get('name')] = line
+    return scripts
+
+
+def get_exec_func(mod, name, is_class=True):
+    func = None
+    for item in dir(mod):
+        if item.startswith('__'):
+            continue
+        item = getattr(mod, item)
+        if is_class:
+            if isclass(item) and issubclass(item, Process):
+                cls = item()
+                if hasattr(cls, 'name') and cls.name.endswith(name):
+                    func = cls.run
+        else:
+            name = name.split('.')[-1]
+            if isfunction(item) and item.__name__ == name:
+                func = item
+    return func

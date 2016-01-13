@@ -44,6 +44,6 @@ else:
     ]
 
 setup(
-    packages = find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
+    packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test", "script"]),
     **setup_args
 )

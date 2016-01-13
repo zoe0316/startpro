@@ -16,7 +16,7 @@ from shutil import ignore_patterns
 from common.utils.config import Config
 from core.utils.opts import get_command
 from core import settings
-from core.utils.opts import load_modeule_auto, _get_opts
+from core.utils.opts import load_module_auto, _get_opts
 import glob
 
 # [LOAD MODULE START]
@@ -39,6 +39,7 @@ if not isinstance(__version__, str):
 def _print_header():
     print("Startpro %s\n" % (__version__))
 
+
 def _print_commands(commands=None):
     _print_header()
     print("Usage:")
@@ -46,8 +47,9 @@ def _print_commands(commands=None):
     if commands:
         print("Available command:")
         for name in sorted(commands.keys()):
-            print("  %s" % (name))
+            print("  %s" % name)
     print('')
+
 
 def _include(src, dst, script_name, name):
     try:
@@ -68,7 +70,8 @@ def _include(src, dst, script_name, name):
             sh_f.write("python pkg.py %s.py core/commands %s" % (name, script_name))
     except OSError:
         print("[Errno 17] File exists: '%s'" % name)
-    
+
+
 def _create(opts):
     try:
         # root_path = os.path.dirname(sys.argv[0])
@@ -90,6 +93,7 @@ def _create(opts):
     except Exception, e:
         print(e)
 
+
 def _start(root_path):
     try:
         path = os.path.join(root_path, settings.MAIN_CONFIG)
@@ -102,10 +106,11 @@ def _start(root_path):
         if script:
             return script
         else:
-            print("[WARN]:[%s] not found in [%s]." % ('default script module name' , path))
+            print("[WARN]:[%s] not found in [%s]." % ('default script module name', path))
             return
     except Exception, e:
         print(e)
+
 
 def pkg_run(curr_path, opts):
     match = _start(curr_path)
@@ -117,16 +122,18 @@ def pkg_run(curr_path, opts):
     opts['load_paths'] = paths
     return match
 
+
 def normal_run(curr_path, opts):
     match = _start(curr_path)
     paths = []
     for m in match.split(","):
-        for re in glob.glob(os.path.join(curr_path, m)):
-            paths.append(os.path.basename(re))
-    load_paths = load_modeule_auto(curr_path, paths)
+        for r in glob.glob(os.path.join(curr_path, m)):
+            paths.append(os.path.basename(r))
+    load_paths = load_module_auto(curr_path, paths)
     opts['paths'] = paths
     opts['load_paths'] = load_paths
     return match
+
 
 def execute(pkg=False):
     try:
@@ -143,9 +150,11 @@ def execute(pkg=False):
             sys.path.append(curr_path)
             if "create" != name:
                 if pkg:
-                    if not pkg_run(__path__[0], opts): return
+                    if not pkg_run(__path__[0], opts):
+                        return
                 else:
-                    if not normal_run(curr_path, opts): return 
+                    if not normal_run(curr_path, opts):
+                        return
             if "help" in opts or "-help" in opts or "--help" in opts:
                 func.help(**opts)
                 return
