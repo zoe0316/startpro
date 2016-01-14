@@ -52,3 +52,5 @@ nosetests.xml
 
 .scripts.tmp
 script
+
+test

@@ -148,7 +148,7 @@ def execute(pkg=False):
                 return
             curr_path = os.getcwd()
             sys.path.append(curr_path)
-            if "create" != name:
+            if name not in ['create', 'start']:
                 if pkg:
                     if not pkg_run(__path__[0], opts):
                         return
