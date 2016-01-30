@@ -1,4 +1,4 @@
-#-*- encoding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 '''
 Created on 2014年.05.26
 
@@ -9,7 +9,6 @@ import os
 
 
 class Config():
-
     def __init__(self, config_file):
         self.config = ConfigParser.ConfigParser()
         self.config_file = config_file

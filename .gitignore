@@ -46,3 +46,11 @@ nosetests.xml
 *.dic
 
 .settings
+
+.idea
+*.DS_Store
+
+.scripts.tmp
+script
+
+test

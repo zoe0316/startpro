@@ -40,10 +40,10 @@ except ImportError:
     from distutils.core import setup
 else:
     setup_args['install_requires'] = [
-        'pyinstaller>=2.1',
+        'pyinstaller==2.1',
     ]
 
 setup(
-    packages = find_packages(exclude=["*.test", "*.test.*", "test.*", "test"]),
+    packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test", "script"]),
     **setup_args
 )
