@@ -36,4 +36,6 @@ TEMPLATE_PACKAGE = os.path.join(TEMPLATE, "package.py")
 # LOAD PATHS
 LOAD_PATHS = '#LOAD_PATHS#'
 
+## TAMP FILE
+SCRIPT_TEMP = '.scripts.tmp'
 
