@@ -14,12 +14,11 @@ from startpro.core.utils.opts import load_script_temp
 import shutil
 from collections import OrderedDict
 
-options = OrderedDict({
-           '-name': "main package name",
-           '-f': "function to package(if more than one, seperate by comma)",
-           '-e': "package functions exculde these specific functions(if more than one, seperate by comma)",
-           '-n': "use sorted number insead of function names instead"
-        })
+options = OrderedDict()
+options['-name'] = "main package name",
+options['-f'] = "function to package(if more than one, seperate by comma)"
+options['-e'] = "package functions exculde these specific functions(if more than one, seperate by comma)"
+options['-n'] = "use sorted number insead of function names"
 
 SPEC_CONTENT = '''
 # -*- mode: python -*-
@@ -148,6 +147,7 @@ class Command(TopCommand):
 
     def help(self, **kwargvs):
         print('')
+        print("Run `startpro list` before running this command!")
         print("Available options:")
         for name, desc in options.iteritems():
             print("  %-13s %s" % (name, desc))
