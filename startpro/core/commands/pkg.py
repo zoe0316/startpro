@@ -10,9 +10,15 @@ from importlib import import_module
 from startpro.core.settings import MAIN_PATH, TEMPLATE_PACKAGE
 import os
 from startpro.core import settings
+from startpro.core.utils.opts import load_script_temp
 import shutil
+from collections import OrderedDict
 
-options = {'-name': "main package name"}
+options = OrderedDict()
+options['-name'] = "main package name",
+options['-f'] = "function to package(if more than one, seperate by comma)"
+options['-e'] = "package functions exculde these specific functions(if more than one, seperate by comma)"
+options['-n'] = "use sorted number insead of function names"
 
 SPEC_CONTENT = '''
 # -*- mode: python -*-
@@ -51,6 +57,7 @@ class Command(TopCommand):
 
     def run(self, **kwargvs):
         try:
+            # print str(kwargvs)
             mod = import_module(MAIN_PATH)
             src = mod.__path__[0]
             path = os.path.join(src, TEMPLATE_PACKAGE)
@@ -65,11 +72,37 @@ class Command(TopCommand):
             # main PY
             dst = os.path.join(PATHEX, PY_NAME)
             shutil.copyfile(path, dst)
-            load_paths = kwargvs['load_paths']
-            self.update(dst, ["import %s" % re for re in load_paths])
+
+            ###### functions to pkg
+            funs = kwargvs.get('f', None)
+            exclue_funcs = kwargvs.get('e', False) != False # default False
+            use_num = kwargvs.get('n', False) != False # default False
+            if not funs and not exclue_funcs:
+                load_paths = kwargvs['load_paths']
+                self.update(dst, ["import %s" % re for re in load_paths])
+            else:
+                import_path = []; exclue_path = []
+                script_funs = load_script_temp()
+                param_funs = filter(lambda x: x.strip() != '', funs.split(','))
+                ## import functions
+                for i, (fun_name, info) in enumerate(script_funs.iteritems()):
+                    script_path = info.get('path', '')
+                    if use_num and str(i) in param_funs:
+                        import_path.append(script_path) # done
+                    # elif '%s.%s' %(script_path, fun_name.split('.')[-1]) in param_funs:
+                    elif fun_name in param_funs:
+                        import_path.append(script_path)
+                    else:
+                        exclue_path.append(script_path)
+                ## if exculde
+                if exclue_funcs:
+                    import_path = exclue_path
+                self.update(dst, ["import %s" % re for re in set(import_path)])
+
             # configure
             cfg = os.path.join(PATHEX, settings.MAIN_CONFIG)
             settings.CONFIG.set_config("package", "load", str(kwargvs.get('paths', '')))  # @UndefinedVariable
+
             # PYINSTALLER
             PKG_NAME = name
             DATA_FILE = []
@@ -83,6 +116,8 @@ class Command(TopCommand):
             with open(spec, 'w') as f:
                 f.write(SPEC_CONTENT)
                 f.flush()
+
+            ## start to pkg
             os.system("pyinstaller -F %s" % spec)
             settings.CONFIG.remove_option("package", "load")  # @UndefinedVariable
             os.remove(spec)
@@ -112,6 +147,7 @@ class Command(TopCommand):
 
     def help(self, **kwargvs):
         print('')
+        print("Run `startpro list` before running this command!")
         print("Available options:")
-        for name, desc in sorted(options.iteritems()):
+        for name, desc in options.iteritems():
             print("  %-13s %s" % (name, desc))

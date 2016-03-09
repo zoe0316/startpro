@@ -13,6 +13,25 @@ import shutil
 
 options = {'-name': "project name"}
 
+DEFAULT_CFG  = '''
+# Automatically created by: startpro
+#
+# For more information about the section see:
+# https://github.com/zoe0316/startpro
+
+[settings]
+# Base settings
+
+# execute module match pattern name
+# default = script
+# default = rest,db,web
+# default = script*
+default = script
+
+[package]
+name = %s
+'''
+
 class Command(TopCommand):
     '''
     classdocs
@@ -35,8 +54,10 @@ class Command(TopCommand):
                 os.mkdir(dst)
             else:
                 print("[INFO]:directory exists.")
-            cfg = os.path.join(src, MAIN_CONFIG)
-            shutil.copy(cfg, dst)
+            cfg_text = DEFAULT_CFG %kwargvs.get('name', '')
+            cfg_path = os.path.join(dst, MAIN_CONFIG)
+            with open(cfg_path, 'w+') as f:
+                f.write(cfg_text)
         except Exception, e:
             print("[ERROR]:%s" % e)
         
