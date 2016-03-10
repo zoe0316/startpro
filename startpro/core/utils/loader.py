@@ -36,7 +36,7 @@ def safe_run(func):
     @functools.wraps(func)
     def _deco(*args, **kvargs):
         try:
-            func(**kvargs)
+            func(*args, **kvargs)
         except KeyboardInterrupt:
             print("KeyboardInterrupt.")
             return True
@@ -48,7 +48,7 @@ def safe_init_run(func):
     def _deco(*args, **kvargs):
         try:
             loader(**kvargs)
-            func(**kvargs)
+            func(*args, **kvargs)
         except KeyboardInterrupt:
             print("KeyboardInterrupt.")
             return True
