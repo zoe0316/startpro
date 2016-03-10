@@ -56,7 +56,7 @@ def safe_init_run(func):
 
 
 def loader(**kwargvs):
-    script_name = get_script_name()
+    script_name, log_name = get_script_name()
     root_path = os.getcwd()
     root_path = kwargvs.get('root_path', root_path)
     # set system context vars
@@ -77,10 +77,10 @@ def loader(**kwargvs):
     log_path = os.path.join(kwargvs.get('log_path', settings.ROOT_PATH), 'log')
     log.set_mail(get_settings('mail_un', ''), get_settings('mail_pw', ''), get_settings('mail_host', ''))
     log.set_mailto(get_settings('mail_to', '').split(','))
-    log.set_logfile(script_name, log_path)
+    log.set_logfile(kwargvs.get('log', None) or log_name, log_path)
     log.info("init context.")
     # set process id
-    with open(os.path.join(settings.CLIENT_FILE, "%s.pid" % settings.NAME), 'w') as f:
+    with open(os.path.join(settings.CLIENT_FILE, "%s.pid" % log_name), 'w') as f:
         f.writelines(["%s" % os.getpid()])
         f.flush()
 
@@ -93,7 +93,8 @@ def get_script_name():
             script_name = script_split[-2]
         else:
             script_name = script_split[-1]
-        return script_name
+        log_name = script_split[-1]
+        return script_name, log_name
     except:
         print('[INFO]:Please chose a script.')
-        sys.exit(1)
+        sys.exit(0)

@@ -6,7 +6,6 @@ Created on 2014.05.26
 @author: Allen
 """
 import os
-import re
 import shutil
 import sys
 from collections import OrderedDict
@@ -83,7 +82,8 @@ class Command(TopCommand):
                 for k, v in scripts.items():
                     for r, b in patterns:
                         p = v.get('path')
-                        if r in p:
+                        n = v.get('name')
+                        if r in p or r in n:
                             if b:
                                 load_paths.append(p)
                                 break
@@ -91,6 +91,8 @@ class Command(TopCommand):
                                 break
             else:
                 load_paths = kwargvs['load_paths']
+            for r in load_paths:
+                print('include:[%s]' % r)
             self.update(dst, ["import %s" % r for r in load_paths])
             # configure
             cfg = os.path.join(PATHEX, settings.MAIN_CONFIG)
