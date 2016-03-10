@@ -76,7 +76,7 @@ def loader(**kwargvs):
     # set log
     log_path = os.path.join(kwargvs.get('log_path', settings.ROOT_PATH), 'log')
     log.set_mail(get_settings('mail_un', ''), get_settings('mail_pw', ''), get_settings('mail_host', ''))
-    log.set_mailto([get_settings('mail_to', '')])
+    log.set_mailto(get_settings('mail_to', '').split(','))
     log.set_logfile(script_name, log_path)
     log.info("init context.")
     # set process id

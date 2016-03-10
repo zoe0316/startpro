@@ -1,18 +1,25 @@
 # encoding: utf-8
 
-'''
+"""
 Created on 2014.05.26
 
 @author: Allen
-'''
+"""
+import os
+import re
+import shutil
+import sys
+from collections import OrderedDict
 from startpro.core.topcmd import TopCommand
 from importlib import import_module
 from startpro.core.settings import MAIN_PATH, TEMPLATE_PACKAGE
-import os
 from startpro.core import settings
-import shutil
+from startpro.core.utils.opts import load_script_temp
 
-options = {'-name': "main package name"}
+options = OrderedDict()
+options['-name'] = "main package name",
+options['-i'] = "package functions include(if more than one, split by comma)"
+options['-e'] = "package functions exclude(if more than one, split by comma)"
 
 SPEC_CONTENT = '''
 # -*- mode: python -*-
@@ -65,8 +72,26 @@ class Command(TopCommand):
             # main PY
             dst = os.path.join(PATHEX, PY_NAME)
             shutil.copyfile(path, dst)
-            load_paths = kwargvs['load_paths']
-            self.update(dst, ["import %s" % re for re in load_paths])
+            patterns = []
+            include_regex = [(r, True) for r in filter(lambda x: x, kwargvs.get('i', '').split(','))]
+            exclude_regex = [(r, False) for r in filter(lambda x: x, kwargvs.get('e', '').split(','))]
+            patterns.extend(include_regex)
+            patterns.extend(exclude_regex)
+            if patterns:
+                load_paths = []
+                scripts = load_script_temp()
+                for k, v in scripts.items():
+                    for r, b in patterns:
+                        p = v.get('path')
+                        if r in p:
+                            if b:
+                                load_paths.append(p)
+                                break
+                            else:
+                                break
+            else:
+                load_paths = kwargvs['load_paths']
+            self.update(dst, ["import %s" % r for r in load_paths])
             # configure
             cfg = os.path.join(PATHEX, settings.MAIN_CONFIG)
             settings.CONFIG.set_config("package", "load", str(kwargvs.get('paths', '')))  # @UndefinedVariable
@@ -85,10 +110,12 @@ class Command(TopCommand):
                 f.flush()
             os.system("pyinstaller -F %s" % spec)
             settings.CONFIG.remove_option("package", "load")  # @UndefinedVariable
-            os.remove(spec)
+            # os.remove(spec)
             print("[INFO]:package:[%s]" % os.path.join(os.path.join(PATHEX, "dist"), PKG_NAME))
         except Exception, e:
             print("[ERROR]:%s" % e)
+            s = sys.exc_info()
+            print('pkg %s on line %d.' % (s[1], s[2].tb_lineno))
 
     def update(self, main_py, res):
         lines = []

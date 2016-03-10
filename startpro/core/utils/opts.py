@@ -151,7 +151,7 @@ def save_script_temp(mapping):
     :return:
     """
     try:
-        path = os.path.join(os.getcwd(), '.scripts.tmp')
+        path = os.path.join(os.getcwd(), settings.SCRIPT_TEMP)
         with(open(path, 'w+')) as tmp_file:
             for k in sorted(mapping.keys()):
                 v = mapping.get(k)
@@ -173,7 +173,7 @@ def load_script_temp():
     should we auto create a script temp file? just remind user to manual execute `startpro list`
     :return:
     """
-    path = os.path.join(os.getcwd(), '.scripts.tmp')
+    path = os.path.join(os.getcwd(), settings.SCRIPT_TEMP)
     if not os.path.exists(path):
         return
     scripts = OrderedDict()
