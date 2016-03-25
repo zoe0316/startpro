@@ -106,8 +106,10 @@ def __scan_mod(path):
                         func_name = "%s.%s" % (mod.__name__, item.__name__)
                         res.append({'name': func_name, 'func': item, 'is_class': False, 'path': mod.__name__})
                         # res.append((func_name, item, False, mod.__name__))
-            except Exception, e:
-                print("scan_mod:%s" % e)
+            except:
+                s = sys.exc_info()
+                print("scan_mod %s on line %d" % (s[1], s[2].tb_lineno))
+
     return res
 
 

@@ -80,7 +80,10 @@ def loader(**kwargvs):
     log.set_logfile(kwargvs.get('log', None) or log_name, log_path)
     log.info("init context.")
     # set process id
-    with open(os.path.join(settings.CLIENT_FILE, "%s.pid" % log_name), 'w') as f:
+    pid_file = kwargvs.get('pid', None) or log_name
+    if not pid_file.endswith('.pid'):
+        pid_file = '%s.pid' % pid_file
+    with open(os.path.join(settings.CLIENT_FILE, pid_file), 'w') as f:
         f.writelines(["%s" % os.getpid()])
         f.flush()
 
