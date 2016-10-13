@@ -76,7 +76,7 @@ def load_module(module_path, match=""):
                 if not module.startswith('__'):
                     mods.append(import_module("%s.%s" % (module_path, module)))
         except Exception, e:
-            print("load_module:%s" % e)
+            print("load_module:%s at:%s" % (e, module_path))
     return mods
 
 

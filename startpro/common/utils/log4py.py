@@ -35,6 +35,7 @@ MAIL_PW = ""
 class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
     """
     """
+
     def __init__(self, capacity, mail_subject):
         logging.handlers.MemoryHandler.__init__(self, capacity, flushLevel=logging.ERROR, target=None)
         self.mail_subject = mail_subject
@@ -86,19 +87,25 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
 class Log:
     """
     """
+
     def __init__(self, log_name=None, root_path='./'):
-        if log_name:
-            self.set_logfile(log_name, root_path)
+        self.fh = None
+        self.ch = None
+        self.mh = None
+        self.sh = None
+        self.set_logfile(log_name, root_path)
 
     def set_logfile(self, log_name, log_path='./'):
         # log_path = os.path.join(root_path, 'log')
         if not os.path.exists(log_path):
             os.mkdir(log_path)
-        if log_name.endswith('.log'):
-            log_file = log_name
-        else:
-            log_file = '%s.log' % log_name
-        log_file = os.path.join(log_path, log_file)
+        log_file = None
+        if log_name:
+            if log_name.endswith('.log'):
+                log_file = log_name
+            else:
+                log_file = '%s.log' % log_name
+            log_file = os.path.join(log_path, log_file)
         self.config(log_file, FILE_LOG_LEVEL, CONSOLE_LOG_LEVEL, MEMOEY_LOG_LEVEL, URGENT_LOG_LEVEL)
 
     def set_mail(self, mail_un, mail_pw, mail_host):
@@ -126,29 +133,31 @@ class Log:
         global ERROR_MESSAGE
         ERROR_MESSAGE = limit
 
-    def config(self, logFile, file_level, console_level, memory_level, urgent_level):
+    def config(self, log_file, file_level, console_level, memory_level, urgent_level):
         # logger configure
         self.logger = logging.getLogger('root')
         self.logger.setLevel(file_level)
-        self.fh = logging.handlers.RotatingFileHandler(logFile, mode='a', maxBytes=1024 * 1024 * 10, backupCount=10, encoding="utf-8")
-        self.fh.setLevel(file_level)
+        # log format
+        formatter = logging.Formatter("%(asctime)s [%(levelname)s] : %(message)s", '%Y-%m-%d %H:%M:%S')
         self.ch = logging.StreamHandler()
         self.ch.setLevel(console_level)
         self.mh = OptmizedMemoryHandler(ERROR_MESSAGE, ERROR_MAIL_SUBJECT)
         self.mh.setLevel(memory_level)
         self.sh = logging.handlers.SMTPHandler(MAIL_HOST, MAIL_UN, ";".join(MAIL_TO), CRITICAL_MAIL_SUBJECT)
         self.sh.setLevel(urgent_level)
-        # log format
-        formatter = logging.Formatter("%(asctime)s [%(levelname)s] : %(message)s", '%Y-%m-%d %H:%M:%S')
         self.ch.setFormatter(formatter)
-        self.fh.setFormatter(formatter)
         self.mh.setFormatter(formatter)
         self.sh.setFormatter(formatter)
         # add handle
         self.logger.addHandler(self.ch)
-        self.logger.addHandler(self.fh)
-        self.logger.addHandler(self.mh)
-        self.logger.addHandler(self.sh)
+        if log_file:
+            self.fh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=1024 * 1024 * 10,
+                                                           backupCount=10, encoding="utf-8")
+            self.fh.setLevel(file_level)
+            self.fh.setFormatter(formatter)
+            self.logger.addHandler(self.fh)
+            self.logger.addHandler(self.mh)
+            self.logger.addHandler(self.sh)
 
     def debug(self, msg):
         if msg is not None:
@@ -169,5 +178,6 @@ class Log:
     def critical(self, msg):
         if msg is not None:
             self.logger.critical(msg)
+
 
 log = Log()
