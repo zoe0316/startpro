@@ -6,11 +6,13 @@ Created on 2014.05.26
 @author: Allen
 """
 import os
-import shutil
 import sys
+import shutil
+
 from collections import OrderedDict
-from startpro.core.topcmd import TopCommand
 from importlib import import_module
+
+from startpro.core.topcmd import TopCommand
 from startpro.core.settings import MAIN_PATH, TEMPLATE_PACKAGE
 from startpro.core import settings
 from startpro.core.utils.opts import load_script_temp
@@ -19,6 +21,8 @@ options = OrderedDict()
 options['-name'] = "main package name",
 options['-i'] = "package functions include(if more than one, split by comma)"
 options['-e'] = "package functions exclude(if more than one, split by comma)"
+# fix to hooks collect
+options['-hooks'] = "collect hooks(if more than one, split by comma)"
 
 SPEC_CONTENT = '''
 # -*- mode: python -*-
@@ -46,14 +50,10 @@ exe = EXE(pyz,
 
 
 class Command(TopCommand):
-    '''
-    classdocs
-    '''
-
     def __init__(self):
-        '''
+        """
         Constructor
-        '''
+        """
 
     def run(self, **kwargvs):
         try:
@@ -66,10 +66,10 @@ class Command(TopCommand):
                     name = settings.CONFIG.get_config('package', 'name')  # @UndefinedVariable
             if not name:
                 return
-            PY_NAME = "%s.py" % name
-            PATHEX = os.getcwd()
+            py_name = "%s.py" % name
+            path_ex = os.getcwd()
             # main PY
-            dst = os.path.join(PATHEX, PY_NAME)
+            dst = os.path.join(path_ex, py_name)
             shutil.copyfile(path, dst)
             patterns = []
             include_regex = [(r, True) for r in filter(lambda x: x, kwargvs.get('i', '').split(','))]
@@ -95,17 +95,22 @@ class Command(TopCommand):
                 print('include:[%s]' % r)
             self.update(dst, ["import %s" % r for r in load_paths])
             # configure
-            cfg = os.path.join(PATHEX, settings.MAIN_CONFIG)
+            cfg = os.path.join(path_ex, settings.MAIN_CONFIG)
             settings.CONFIG.set_config("package", "load", str(kwargvs.get('paths', '')))  # @UndefinedVariable
-            # PYINSTALLER
-            PKG_NAME = name
-            DATA_FILE = []
-            DATA_FILE.append(('/startpro/VERSION', os.path.join(src, 'VERSION'), 'DATA'))
-            DATA_FILE.append(('/startpro/startpro.cfg', cfg, 'DATA'))
-            DATA_FILE.append(('/startpro/template/package.py', path, 'DATA'))
+            # py installer
+            pkg_name = name
+            data_file = [
+                ('/startpro/VERSION', os.path.join(src, 'VERSION'), 'DATA'),
+                ('/startpro/startpro.cfg', cfg, 'DATA'),
+                ('/startpro/template/package.py', path, 'DATA')
+            ]
+            # update extend hooks
+            hooks = kwargvs.get('hooks', '').strip()
+            # if hooks:
+            #     [data_file.extend(collect_data_files(r)) for r in hooks.split(',')]
             global SPEC_CONTENT
-            SPEC_CONTENT = SPEC_CONTENT.replace("#PY_NAME#", PY_NAME).replace("#PATHEX#", PATHEX). \
-                replace("#DATA_FILE#", str(DATA_FILE)).replace("#PKG_NAME#", PKG_NAME)
+            SPEC_CONTENT = SPEC_CONTENT.replace("#PY_NAME#", py_name).replace("#PATHEX#", path_ex). \
+                replace("#DATA_FILE#", str(data_file)).replace("#PKG_NAME#", pkg_name)
             spec = dst.replace(".py", ".spec")
             with open(spec, 'w') as f:
                 f.write(SPEC_CONTENT)
@@ -113,13 +118,14 @@ class Command(TopCommand):
             os.system("pyinstaller -F %s" % spec)
             settings.CONFIG.remove_option("package", "load")  # @UndefinedVariable
             # os.remove(spec)
-            print("[INFO]:package:[%s]" % os.path.join(os.path.join(PATHEX, "dist"), PKG_NAME))
-        except Exception, e:
+            print("[INFO]:package:[%s]" % os.path.join(os.path.join(path_ex, "dist"), pkg_name))
+        except Exception as e:
             print("[ERROR]:%s" % e)
             s = sys.exc_info()
             print('pkg %s on line %d.' % (s[1], s[2].tb_lineno))
 
-    def update(self, main_py, res):
+    @staticmethod
+    def update(main_py, res):
         lines = []
         start = False
         end = False

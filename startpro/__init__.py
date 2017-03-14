@@ -1,10 +1,11 @@
 # encoding: utf-8
 
-'''
+"""
 Created on 2014.05.26
 
 @author: Allen
-'''
+"""
+from __future__ import absolute_import
 
 import os
 import sys
@@ -13,31 +14,38 @@ import pkgutil
 import shutil
 from importlib import import_module
 from shutil import ignore_patterns
-from common.utils.config import Config
-from core.utils.opts import get_command
-from core import settings
-from core.utils.opts import load_module_auto, _get_opts
 import glob
 
+from startpro.common.utils.config import Config
+from startpro.core.utils.opts import get_command
+from startpro.core import settings
+from startpro.core.utils.opts import load_module_auto, get_opts
+
+
 # [LOAD MODULE START]
-import core.commands.start
-import core.commands.list
-import core.commands.create
-import core.commands.pkg
+import startpro.core.commands.start
+import startpro.core.commands.list
+import startpro.core.commands.create
+import startpro.core.commands.pkg
 # [LOAD MODULE END]
 
 import json
 
-reload(sys)
-sys.setdefaultencoding('utf8')  # @UndefinedVariable
+if sys.version_info < (3, 4):
+    # compatible with python 2
+    reload(sys)
+    sys.setdefaultencoding('utf8')  # @UndefinedVariable
 
-__version__ = pkgutil.get_data(__package__, 'VERSION').strip()
-if not isinstance(__version__, str):
-    __version__ = __version__.decode('utf8')
+if __package__:
+    __version__ = pkgutil.get_data(__package__, 'VERSION')
+    if not isinstance(__version__, str):
+        __version__ = __version__.decode('utf8')
+else:
+    __version__ = None
 
 
 def _print_header():
-    print("Startpro %s\n" % (__version__))
+    print("Startpro {}\n".format(__version__))
 
 
 def _print_commands(commands=None):
@@ -47,29 +55,29 @@ def _print_commands(commands=None):
     if commands:
         print("Available command:")
         for name in sorted(commands.keys()):
-            print("  %s" % name)
+            print("  {}".format(name))
     print('')
 
 
 def _include(src, dst, script_name, name):
     try:
         shutil.copytree(src, dst, ignore=ignore_patterns('*.pyc', "VERSION"))
-        os.rename(os.path.join(dst, settings.MAIN_PY), os.path.join(dst, "%s.py" % name))
+        os.rename(os.path.join(dst, settings.MAIN_PY), os.path.join(dst, "{}.py".format(name)))
         try:
             os.remove(os.path.join(dst, '__init__.py'))
         except:
             pass
         f = os.path.join(dst, settings.MAIN_SETTING)
-        res = re.sub(r"%SCRIPT_MODULE_FLAG%", "%s" % script_name, open(f).read())
+        res = re.sub(r"%SCRIPT_MODULE_FLAG%", "{}".format(script_name), open(f).read())
         with open(f, 'w') as setting_f:
             setting_f.write(res)
         f = os.path.join(dst, "script")
         os.rename(f, os.path.join(dst, script_name))
         f = os.path.join(dst, "package.sh")
         with open(f, 'w') as sh_f:
-            sh_f.write("python pkg.py %s.py core/commands %s" % (name, script_name))
+            sh_f.write("python pkg.py {}.py core/commands {}".format(name, script_name))
     except OSError:
-        print("[Errno 17] File exists: '%s'" % name)
+        print("[Errno 17] File exists: '{}'".format(name))
 
 
 def _create(opts):
@@ -90,7 +98,7 @@ def _create(opts):
             _include(src, dst, script_name, name)
         else:
             pass
-    except Exception, e:
+    except Exception as e:
         print(e)
 
 
@@ -98,7 +106,7 @@ def _start(root_path):
     try:
         path = os.path.join(root_path, settings.MAIN_CONFIG)
         if not os.path.exists(path):
-            print("[WARN]:[%s] not found." % path)
+            print("[WARN]:[{}] not found.".format(path))
             return
         config = Config(path)
         settings.CONFIG = config
@@ -106,9 +114,9 @@ def _start(root_path):
         if script:
             return script
         else:
-            print("[WARN]:[%s] not found in [%s]." % ('default script module name', path))
+            print("[WARN]:[{}] not found in [{}].".format('default script module name', path))
             return
-    except Exception, e:
+    except Exception as e:
         print(e)
 
 
@@ -140,7 +148,7 @@ def execute(pkg=False):
         cmds = get_command([settings.COMMAND_MODEULE])
         if len(sys.argv) > 1:
             name = sys.argv[1]
-            opts = _get_opts(sys.argv)
+            opts = get_opts(sys.argv)
             func = cmds.get(name)
             if not func:
                 print("[INFO]:Unsupported command.\n")
@@ -163,5 +171,5 @@ def execute(pkg=False):
             _print_commands(cmds)
     except:
         s = sys.exc_info()
-        msg = u'[ERROR]:execute [%s] happened on line %d' % (s[1], s[2].tb_lineno)
+        msg = '[ERROR]:execute [{}] happened on line {}'.format(s[1], s[2].tb_lineno)
         print(msg)

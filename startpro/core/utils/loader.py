@@ -4,12 +4,13 @@ Created on Dec 2, 2014
 @author: Allen
 """
 
-from startpro.common.utils.log4py import log
-from startpro.core import settings
-from startpro.common.utils.config import Config
 import os
 import sys
 import functools
+
+from startpro.common.utils.log4py import log
+from startpro.core import settings
+from startpro.common.utils.config import Config
 
 
 def load_config(config_file, section):
@@ -30,8 +31,8 @@ def get_settings(attr_name, default=None):
         return getattr(settings, attr_name.upper())
     else:
         return default
-    
-    
+
+
 def safe_run(func):
     @functools.wraps(func)
     def _deco(*args, **kvargs):
@@ -40,6 +41,7 @@ def safe_run(func):
         except KeyboardInterrupt:
             print("KeyboardInterrupt.")
             return True
+
     return _deco
 
 
@@ -52,6 +54,7 @@ def safe_init_run(func):
         except KeyboardInterrupt:
             print("KeyboardInterrupt.")
             return True
+
     return _deco
 
 

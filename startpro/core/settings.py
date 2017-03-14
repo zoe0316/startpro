@@ -1,10 +1,10 @@
 # encoding: utf-8
 
-'''
+"""
 Created on 2014.04.21
 
 @author: Allen
-'''
+"""
 import os
 
 COMMAND_MODEULE = 'startpro.core.commands'
@@ -38,4 +38,3 @@ LOAD_PATHS = '#LOAD_PATHS#'
 
 # TAMP FILE
 SCRIPT_TEMP = '.scripts.tmp'
-

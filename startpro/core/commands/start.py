@@ -6,9 +6,10 @@ Created on 2014.05.26
 @author: Allen
 """
 import sys
+from importlib import import_module
+
 from startpro.core.topcmd import TopCommand
 from startpro.core.utils.opts import load_script_temp, get_exec_func
-from importlib import import_module
 
 options = {"-full": "if need full path name of script"}
 

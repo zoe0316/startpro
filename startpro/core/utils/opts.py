@@ -18,7 +18,7 @@ from startpro.core.process import Process
 from startpro.core.topcmd import TopCommand
 
 
-def _get_opts(argv):
+def get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
     while argv:  # While there are arguments left to parse...
         if argv[0][0] == '-':  # Found a "-name value" pair.
@@ -45,8 +45,8 @@ def load_module_auto(root_path, scan_paths):
                         module_path = module_path[1: -3]
                     paths.add(module_path)
                     import_module(module_path)
-                except Exception, e:
-                    print("load:[%s], %s" % (module_path, e))
+                except Exception as e:
+                    print("load:[{}], {}".format(module_path, e))
     return list(paths)
 
 
@@ -66,7 +66,7 @@ def load_module(module_path, match=""):
             config = settings.CONFIG
             if config:
                 match.extend(config.get_config('settings', 'default').split(","))  # @UndefinedVariable
-            p = re.compile("|".join(["\A%s" % r for r in match]))
+            p = re.compile("|".join(["\A{}".format(r) for r in match]))
             # if not match commands or main scripts
             if not p.match(module_path):
                 return mods
@@ -74,9 +74,9 @@ def load_module(module_path, match=""):
             for module in dir(mod):
                 # if module_path.startswith(settings.COMMAND_MODEULE) or module_path.startswith(settings.SCRIPT_MODULE):
                 if not module.startswith('__'):
-                    mods.append(import_module("%s.%s" % (module_path, module)))
-        except Exception, e:
-            print("load_module:%s at:%s" % (e, module_path))
+                    mods.append(import_module("{}.{}".format(module_path, module)))
+        except Exception as e:
+            print("load_module:{} at:{}".format(e, module_path))
     return mods
 
 
@@ -108,7 +108,7 @@ def __scan_mod(path):
                         # res.append((func_name, item, False, mod.__name__))
             except:
                 s = sys.exc_info()
-                print("scan_mod %s on line %d" % (s[1], s[2].tb_lineno))
+                print("scan_mod {} on line {}".format(s[1], s[2].tb_lineno))
 
     return res
 

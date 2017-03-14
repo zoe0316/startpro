@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 import os
+
+from setuptools import find_packages
 
 with open(os.path.join(os.path.dirname(__file__), 'startpro/VERSION')) as f:
     version = f.read().strip()
@@ -7,7 +8,6 @@ with open(os.path.join(os.path.dirname(__file__), 'startpro/VERSION')) as f:
 scripts = ['bin/startpro']
 if os.name == 'nt':
     scripts.append('bin/startpro.bat')
-
 
 setup_args = {
     'name': 'startpro',
@@ -40,7 +40,8 @@ except ImportError:
     from distutils.core import setup
 else:
     setup_args['install_requires'] = [
-        'pyinstaller==2.1',
+        'pyinstaller',
+        'configparser'
     ]
 
 setup(
