@@ -54,3 +54,4 @@ nosetests.xml
 script
 
 test
+test.py

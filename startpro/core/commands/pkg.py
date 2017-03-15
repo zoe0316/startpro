@@ -22,7 +22,7 @@ options['-name'] = "main package name",
 options['-i'] = "package functions include(if more than one, split by comma)"
 options['-e'] = "package functions exclude(if more than one, split by comma)"
 # fix to hooks collect
-options['-hooks'] = "collect hooks(if more than one, split by comma)"
+options['-add-data'] = "py-installer add-data string [such: 'SRC:DEST,SRC:DEST' ]"
 
 SPEC_CONTENT = '''
 # -*- mode: python -*-
@@ -105,9 +105,12 @@ class Command(TopCommand):
                 ('/startpro/template/package.py', path, 'DATA')
             ]
             # update extend hooks
-            hooks = kwargvs.get('hooks', '').strip()
-            # if hooks:
-            #     [data_file.extend(collect_data_files(r)) for r in hooks.split(',')]
+            more_file = kwargvs.get('add-data', '').strip()
+            # parse add-file
+            if more_file:
+                for r in more_file.split(','):
+                    r = r.split(':')
+                    data_file.append((r[1], r[0], 'DATA'))
             global SPEC_CONTENT
             SPEC_CONTENT = SPEC_CONTENT.replace("#PY_NAME#", py_name).replace("#PATHEX#", path_ex). \
                 replace("#DATA_FILE#", str(data_file)).replace("#PKG_NAME#", pkg_name)
@@ -115,7 +118,7 @@ class Command(TopCommand):
             with open(spec, 'w') as f:
                 f.write(SPEC_CONTENT)
                 f.flush()
-            os.system("pyinstaller -F %s" % spec)
+            os.system("pyinstaller -F {}".format(spec))
             settings.CONFIG.remove_option("package", "load")  # @UndefinedVariable
             # os.remove(spec)
             print("[INFO]:package:[%s]" % os.path.join(os.path.join(path_ex, "dist"), pkg_name))
