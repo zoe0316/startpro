@@ -31,5 +31,5 @@ class Command(TopCommand):
         print('Lists all program.')
         print('')
         print("Available options:")
-        for name, desc in sorted(options.iteritems()):
+        for name, desc in sorted(options.items()):
             print("  %-13s %s" % (name, desc))

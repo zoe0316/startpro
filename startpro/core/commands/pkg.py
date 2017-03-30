@@ -22,7 +22,7 @@ options['-name'] = "main package name",
 options['-i'] = "package functions include(if more than one, split by comma)"
 options['-e'] = "package functions exclude(if more than one, split by comma)"
 # fix to hooks collect
-options['-add-data'] = "py-installer add-data string [such: 'SRC:DEST,SRC:DEST' ]"
+options['-add-data'] = "py-installer add-data string [such:'SRC:DEST,SRC:DEST']"
 
 SPEC_CONTENT = '''
 # -*- mode: python -*-
@@ -119,7 +119,7 @@ class Command(TopCommand):
                 f.write(SPEC_CONTENT)
                 f.flush()
             os.system("pyinstaller -F {}".format(spec))
-            settings.CONFIG.remove_option("package", "load")  # @UndefinedVariable
+            settings.CONFIG.remove_option("package", "load")
             # os.remove(spec)
             print("[INFO]:package:[%s]" % os.path.join(os.path.join(path_ex, "dist"), pkg_name))
         except Exception as e:
@@ -151,5 +151,5 @@ class Command(TopCommand):
     def help(self, **kwargvs):
         print('')
         print("Available options:")
-        for name, desc in sorted(options.iteritems()):
+        for name, desc in sorted(options.items()):
             print("  %-13s %s" % (name, desc))

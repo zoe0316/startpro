@@ -12,6 +12,7 @@ import sys
 import re
 import pkgutil
 import shutil
+import platform
 from importlib import import_module
 from shutil import ignore_patterns
 import glob
@@ -20,7 +21,6 @@ from startpro.common.utils.config import Config
 from startpro.core.utils.opts import get_command
 from startpro.core import settings
 from startpro.core.utils.opts import load_module_auto, get_opts
-
 
 # [LOAD MODULE START]
 import startpro.core.commands.start
@@ -36,16 +36,15 @@ if sys.version_info < (3, 4):
     reload(sys)
     sys.setdefaultencoding('utf8')  # @UndefinedVariable
 
-if __package__:
-    __version__ = pkgutil.get_data(__package__, 'VERSION')
-    if not isinstance(__version__, str):
-        __version__ = __version__.decode('utf8')
-else:
-    __version__ = None
+
+__version__ = pkgutil.get_data('startpro', 'VERSION')
+if not isinstance(__version__, str):
+    __version__ = __version__.decode('utf8')
 
 
 def _print_header():
-    print("Startpro {}\n".format(__version__))
+    print("Startpro {}".format(__version__))
+    print("Python Version:{}\n".format(platform.python_version()))
 
 
 def _print_commands(commands=None):
@@ -103,6 +102,11 @@ def _create(opts):
 
 
 def _start(root_path):
+    """
+    link to start command
+    :param root_path:
+    :return:
+    """
     try:
         path = os.path.join(root_path, settings.MAIN_CONFIG)
         if not os.path.exists(path):
@@ -121,8 +125,13 @@ def _start(root_path):
 
 
 def pkg_run(curr_path, opts):
+    """
+    for py-installer package run mode only
+    :param curr_path:
+    :param opts:
+    :return:
+    """
     match = _start(curr_path)
-    # print curr_path
     paths = settings.CONFIG.get_config("package", "load")
     paths = json.loads(paths.replace("'", '"'))
     # load_paths = load_modeule_auto("", paths)
@@ -132,6 +141,12 @@ def pkg_run(curr_path, opts):
 
 
 def normal_run(curr_path, opts):
+    """
+    command run mode
+    :param curr_path:
+    :param opts:
+    :return:
+    """
     match = _start(curr_path)
     paths = []
     for m in match.split(","):
@@ -144,6 +159,11 @@ def normal_run(curr_path, opts):
 
 
 def execute(pkg=False):
+    """
+    main process
+    :param pkg:
+    :return:
+    """
     try:
         cmds = get_command([settings.COMMAND_MODEULE])
         if len(sys.argv) > 1:
@@ -163,7 +183,7 @@ def execute(pkg=False):
                 else:
                     if not normal_run(curr_path, opts):
                         return
-            if "help" in opts or "-help" in opts or "--help" in opts:
+            if "-h" in opts or "-help" in opts or "--help" in opts:
                 func.help(**opts)
                 return
             func.run(**opts)

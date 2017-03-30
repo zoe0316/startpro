@@ -17,6 +17,9 @@ from startpro.core import settings
 from startpro.core.process import Process
 from startpro.core.topcmd import TopCommand
 
+# uniq module dict to prevent max loop
+UNIQ_MODULE = {}
+
 
 def get_opts(argv):
     opts = {}  # Empty dictionary to store key-value pairs.
@@ -43,6 +46,9 @@ def load_module_auto(root_path, scan_paths):
                     module_path = ".".join(f)
                     if module_path.startswith("."):
                         module_path = module_path[1: -3]
+                    # uniq
+                    if module_path in paths:
+                        continue
                     paths.add(module_path)
                     import_module(module_path)
                 except Exception as e:
@@ -65,7 +71,7 @@ def load_module(module_path, match=""):
             match = [settings.COMMAND_MODEULE]
             config = settings.CONFIG
             if config:
-                match.extend(config.get_config('settings', 'default').split(","))  # @UndefinedVariable
+                match.extend(config.get_config('settings', 'default').split(","))
             p = re.compile("|".join(["\A{}".format(r) for r in match]))
             # if not match commands or main scripts
             if not p.match(module_path):
@@ -90,10 +96,17 @@ def __scan_mod(path):
     when module in this package starts with 'run'
     """
     res = []
+
     for mod in load_module(path):
         for item in dir(mod):
             try:
                 item = getattr(mod, item)
+                # get item id
+                item_id = id(item)
+                if item_id in UNIQ_MODULE:
+                    continue
+                # set item to uniq dict
+                UNIQ_MODULE[item_id] = None
                 if isclass(item) and issubclass(item, Process):
                     cls = item()
                     if hasattr(cls, 'name'):

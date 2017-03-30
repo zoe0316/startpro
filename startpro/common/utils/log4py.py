@@ -45,7 +45,7 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
         """
         if reach max
         """
-        if len(self.buffer) >= self.capacity:
+        if len(self.buffer) >= ERROR_MESSAGE:
             return True
         else:
             return False
@@ -54,19 +54,19 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
         """
         """
         if self.buffer != [] and len(self.buffer) >= self.capacity:
-            content = ""
+            content = []
             for record in self.buffer:
                 message = record.getMessage()
                 level = record.levelname
-                ctime = record.created
-                t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ctime))
-                content += t + " " + "*" + level + "* : " + message + "\n"
-            self.notify(self.mail_subject, content)
+                t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))
+                content.append('{} * {} * : {}'.format(t, level, message))
+            self.notify(self.mail_subject, '\n'.join(content))
             self.flushed_buffers.extend(self.buffer)
             self.buffer = []
 
     @staticmethod
     def notify(subject, content):
+        # TODO use thread instead of this block send
         if MAIL_TO and MAIL_UN and MAIL_PW and MAIL_HOST:
             """
             send mail
@@ -156,6 +156,7 @@ class Log:
     def config(self, log_file, file_level, console_level, memory_level, urgent_level):
         """
         set log option
+        :param log_error_limit: error log count
         :param log_file: log file path
         :param file_level: log level
         :param console_level:

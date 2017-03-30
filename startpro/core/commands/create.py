@@ -46,5 +46,5 @@ class Command(TopCommand):
         print('Create a project.')
         print('')
         print("Available options:")
-        for name, desc in sorted(options.iteritems()):
+        for name, desc in sorted(options.items()):
             print("  %-13s %s" % (name, desc))
