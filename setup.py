@@ -25,8 +25,16 @@ setup_args = {
     'classifiers': [
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'License :: OSI Approved :: BSD License',
+
         'Operating System :: OS Independent',
+        'Operating System :: POSIX',
+        'Operating System :: MacOS',
+        'Operating System :: Unix',
+
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Environment :: Console',
