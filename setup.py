@@ -49,7 +49,6 @@ except ImportError:
 else:
     setup_args['install_requires'] = [
         'pyinstaller',
-        'configparser'
     ]
 
 setup(

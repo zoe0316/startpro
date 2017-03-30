@@ -5,8 +5,12 @@ Created on 2014年.05.26
 @author: Allen
 """
 import os
+import sys
 
-from configparser import ConfigParser
+if sys.version_info[0] < 3:
+    from ConfigParser import ConfigParser
+else:
+    from configparser import ConfigParser
 
 
 class Config(object):
