@@ -35,13 +35,16 @@ def run(**kw):
 
 ```
 1. Add safe init run model
-2. Add log config for mail service in config.ini (safe_init_run model only),if the log error logging more than 50, it will be sent to your e-mail.
+2. Add log config for mail service in config.ini (safe_init_run model only),if the log error logging more than [log_error_limit], it will be sent to your e-mail.
 ```shell
 [common]
 mail_to = 
 mail_un = 
 mail_pw = 
 mail_host = 
+log_error_limit = 50
+# seconds for keep log error time window to send notify
+log_error_window = 0
 
 # custom config
 # [test]
