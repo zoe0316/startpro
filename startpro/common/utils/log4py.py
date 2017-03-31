@@ -7,6 +7,7 @@ import time
 import socket
 import smtplib
 import logging.handlers
+from collections import deque
 from email.mime.text import MIMEText
 
 FILE_LOG_LEVEL = logging.INFO
@@ -21,7 +22,12 @@ host = socket.gethostname()
 
 ERROR_MAIL_SUBJECT = "%s:Too many errors occurred during the execution" % host
 
+# error log count to send notify
 ERROR_MESSAGE = 50
+
+# seconds for keep log error time window to send notify
+# 0: forever
+ERROR_MESSAGE_WINDOW = 0
 
 CRITICAL_MAIL_SUBJECT = "%s:Fatal error occurred" % host
 
@@ -39,13 +45,29 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
     def __init__(self, capacity, mail_subject):
         logging.handlers.MemoryHandler.__init__(self, capacity, flushLevel=logging.ERROR, target=None)
         self.mail_subject = mail_subject
-        self.flushed_buffers = []
+        self.buffer = deque(maxlen=ERROR_MESSAGE)
+
+    def emit(self, record):
+        """
+        Emit a record.
+
+        Append the record. If shouldFlush() tells us to, call flush() to process
+        the buffer.
+        """
+        self.buffer.append({'record': record, 'time': int(time.time())})
+        if self.shouldFlush(record):
+            self.flush()
 
     def shouldFlush(self, record):
         """
         if reach max
         """
         if len(self.buffer) >= ERROR_MESSAGE:
+            if ERROR_MESSAGE_WINDOW:
+                # check error time window
+                if (self.buffer[-1]['time'] - self.buffer[0]['time']) <= ERROR_MESSAGE_WINDOW:
+                    return True
+                return False
             return True
         else:
             return False
@@ -53,20 +75,25 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
     def flush(self):
         """
         """
-        if self.buffer != [] and len(self.buffer) >= self.capacity:
-            content = []
-            for record in self.buffer:
-                message = record.getMessage()
-                level = record.levelname
-                t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))
-                content.append('{} * {} * : {}'.format(t, level, message))
-            self.notify(self.mail_subject, '\n'.join(content))
-            self.flushed_buffers.extend(self.buffer)
-            self.buffer = []
+        self.acquire()
+        try:
+            if self.shouldFlush(None):
+                content = []
+                for r in self.buffer:
+                    record = r['record']
+                    message = record.getMessage()
+                    level = record.levelname
+                    t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))
+                    content.append('{} * {} * : {}'.format(t, level, message))
+                if content:
+                    self.notify(self.mail_subject, '\n'.join(content))
+                # clear buffer
+                self.buffer.clear()
+        finally:
+            self.release()
 
     @staticmethod
     def notify(subject, content):
-        # TODO use thread instead of this block send
         if MAIL_TO and MAIL_UN and MAIL_PW and MAIL_HOST:
             """
             send mail
@@ -143,8 +170,7 @@ class Log:
         else:
             pass
 
-    @staticmethod
-    def set_error_limit(limit=50):
+    def set_error_limit(self, limit=50):
         """
 
         :param limit: limit size
@@ -152,11 +178,17 @@ class Log:
         """
         global ERROR_MESSAGE
         ERROR_MESSAGE = limit
+        # update deque max len
+        self.mh.buffer = deque(maxlen=ERROR_MESSAGE)
+
+    @staticmethod
+    def set_error_window(window=0):
+        global ERROR_MESSAGE_WINDOW
+        ERROR_MESSAGE_WINDOW = window
 
     def config(self, log_file, file_level, console_level, memory_level, urgent_level):
         """
         set log option
-        :param log_error_limit: error log count
         :param log_file: log file path
         :param file_level: log level
         :param console_level:
@@ -180,6 +212,8 @@ class Log:
         self.sh.setFormatter(formatter)
         # add handle
         self.logger.addHandler(self.ch)
+        self.logger.addHandler(self.mh)
+        self.logger.addHandler(self.sh)
         if log_file:
             self.fh = logging.handlers.RotatingFileHandler(
                 log_file, mode='a', maxBytes=1024 * 1024 * 10,
@@ -188,8 +222,6 @@ class Log:
             self.fh.setLevel(file_level)
             self.fh.setFormatter(formatter)
             self.logger.addHandler(self.fh)
-            self.logger.addHandler(self.mh)
-            self.logger.addHandler(self.sh)
 
     def debug(self, msg):
         if msg:

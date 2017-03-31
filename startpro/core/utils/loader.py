@@ -59,6 +59,11 @@ def safe_init_run(func):
 
 
 def loader(**kwargvs):
+    """
+    init context loader
+    :param kwargvs:
+    :return:
+    """
     script_name, log_name = get_script_name()
     root_path = os.getcwd()
     root_path = kwargvs.get('root_path', root_path)
@@ -78,17 +83,24 @@ def loader(**kwargvs):
             os.mkdir(path)
     # set log
     log_path = os.path.join(kwargvs.get('log_path', settings.ROOT_PATH), 'log')
+    # set mail to address
     log.set_mail(get_settings('mail_un', ''), get_settings('mail_pw', ''), get_settings('mail_host', ''))
     log.set_mailto(get_settings('mail_to', '').split(','))
+    # set log error count limit
+    log.set_error_limit(int(get_settings('log_error_limit', 50)))
+    # set log error time window to flush MemoryHandler
+    log.set_error_window(int(get_settings('log_error_window', 0)))
+    # set log file name
     log.set_logfile(kwargvs.get('log', None) or log_name, log_path)
-    log.info("init context.")
+    log.info("init context : {}".format(script_name))
     # set process id
     pid_file = kwargvs.get('pid', None) or log_name
     if not pid_file.endswith('.pid'):
         pid_file = '%s.pid' % pid_file
-    with open(os.path.join(settings.CLIENT_FILE, pid_file), 'w') as f:
-        f.writelines(["%s" % os.getpid()])
-        f.flush()
+    # write pid file
+    with open(os.path.join(settings.CLIENT_FILE, pid_file), 'w') as p_file:
+        p_file.writelines(["%s" % os.getpid()])
+        p_file.flush()
 
 
 def get_script_name():
