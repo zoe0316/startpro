@@ -200,7 +200,9 @@ class Log:
         self.logger = logging.getLogger()
         self.logger.setLevel(file_level)
         # log format
-        formatter = logging.Formatter("%(asctime)s [%(levelname)s] : %(message)s", '%Y-%m-%d %H:%M:%S')
+        date_fmt = '%Y-%m-%d %H:%M:%S'
+        log_fmt = '%(asctime)-15s %(levelname)s p:[%(process)d] file:[%(filename)s] line:[%(lineno)d] %(message)s'
+        formatter = logging.Formatter(log_fmt, date_fmt)
         self.ch = logging.StreamHandler()
         self.ch.setLevel(console_level)
         self.mh = OptmizedMemoryHandler(ERROR_MESSAGE, ERROR_MAIL_SUBJECT)
