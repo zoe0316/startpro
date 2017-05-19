@@ -126,7 +126,7 @@ def __scan_mod(path):
     return res
 
 
-def get_script(paths, full=False):
+def get_script(paths, full=False, choose=None):
     """
     Return: dict of executable script name
     """
@@ -138,6 +138,11 @@ def get_script(paths, full=False):
                 mapping[name] = r
             else:
                 mapping[".".join(name.split(".")[1:])] = r
+    # filter
+    if choose:
+        for key in set(mapping.keys()):
+            if key.split(".")[0] not in choose.split(','):
+                del(mapping[key])
     # save script list to temp file
     save_script_temp(mapping)
     return mapping
