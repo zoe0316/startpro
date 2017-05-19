@@ -8,8 +8,8 @@ Created on 2014.05.26
 from startpro.core.topcmd import TopCommand
 from startpro.core.utils.opts import get_script
 
-options = {"-full": "if need full path name of script"}
-
+options = {"-full": "if need full path name of script",
+           "-choose":'if need to display the scripts you want. e.g. Like script "first.second.third" which start with "first" Use [script list -choose first] to show all qualified scripts'}
 
 class Command(TopCommand):
     """
@@ -22,7 +22,7 @@ class Command(TopCommand):
         """
 
     def run(self, **kwargvs):
-        scripts = enumerate(sorted(get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False))).keys()))
+        scripts = enumerate(sorted(get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False)), kwargvs.get('choose', None)).keys()))
         print('[INFO]:script list:')
         for i, k in scripts:
             print('----> %d: %s' % (i, k))
