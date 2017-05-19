@@ -9,7 +9,7 @@ from startpro.core.topcmd import TopCommand
 from startpro.core.utils.opts import get_script
 
 options = {"-full": "if need full path name of script",
-           "-choose":'if need to display the scripts you want. e.g. Like script "first.second.third" which startwith "first" Use [script list -choose first] to show all qualified scripts'}
+           "-choose":'if need to display the scripts you want. e.g. Like script "first.second.third" which start with "first" Use [script list -choose first] to show all qualified scripts'}
 
 class Command(TopCommand):
     """
