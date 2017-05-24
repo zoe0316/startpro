@@ -201,7 +201,7 @@ class Log:
         self.logger.setLevel(file_level)
         # log format
         date_fmt = '%Y-%m-%d %H:%M:%S'
-        log_fmt = '%(asctime)-15s %(levelname)s p:[%(process)d] file:[%(filename)s] line:[%(lineno)d] %(message)s'
+        log_fmt = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(filename)s] line:[%(lineno)d] %(message)s'
         formatter = logging.Formatter(log_fmt, date_fmt)
         self.ch = logging.StreamHandler()
         self.ch.setLevel(console_level)
