@@ -3,6 +3,7 @@ Created on 2013.03.20
 @author: Allen
 """
 import os
+import sys
 import time
 import socket
 import smtplib
@@ -36,6 +37,10 @@ MAIL_HOST = ""
 MAIL_TO = []
 MAIL_UN = ""
 MAIL_PW = ""
+
+# log format
+FMT_DATE = '%Y-%m-%d %H:%M:%S'
+FMT_LINE = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(pathname)s] line:[%(lineno)d] %(message)s'
 
 
 class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
@@ -82,10 +87,6 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
                 for r in self.buffer:
                     record = r['record']
                     msg = self.format(record)
-                    # message = record.getMessage()
-                    # level = record.levelname
-                    # t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))
-                    # content.append('{} * {} * : {}'.format(t, level, message))
                     content.append(msg)
                 if content:
                     self.notify(self.mail_subject, '\n'.join(content))
@@ -110,9 +111,15 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
                 # s.set_debuglevel(1)
                 s.login(MAIL_UN, MAIL_PW)
                 s.sendmail(MAIL_UN, MAIL_TO, msg.as_string())
-                s.close()
-            except:
-                pass
+            except Exception:
+                s = sys.exc_info()
+                msg = '[ERROR]:notify [{}] happened on line {}'.format(s[1], s[2].tb_lineno)
+                print(msg)
+            finally:
+                try:
+                    s.close()
+                except:
+                    pass
 
 
 class Log:
@@ -120,13 +127,17 @@ class Log:
     startpro log instance
     """
 
-    def __init__(self, log_name=None, root_path='./'):
+    def __init__(self):
         self.fh = None
         self.ch = None
         self.mh = None
         self.sh = None
-        self.logger = None
-        self.set_logfile(log_name, root_path)
+        self._formatter = None
+        self.logger = logging.getLogger()
+
+    @property
+    def formatter(self):
+        return self._formatter or logging.Formatter(FMT_LINE, FMT_DATE)
 
     def set_logfile(self, log_name, log_path='./'):
         """
@@ -136,7 +147,6 @@ class Log:
         :param log_path:
         :return:
         """
-        # log_path = os.path.join(root_path, 'log')
         if not os.path.exists(log_path):
             os.mkdir(log_path)
         log_file = None
@@ -147,7 +157,7 @@ class Log:
             else:
                 log_file = '%s.log' % log_name
             log_file = os.path.join(log_path, log_file)
-        self.config(log_file, FILE_LOG_LEVEL, CONSOLE_LOG_LEVEL, MEMOEY_LOG_LEVEL, URGENT_LOG_LEVEL)
+        self.config(log_file, FILE_LOG_LEVEL, CONSOLE_LOG_LEVEL)
 
     @staticmethod
     def set_mail(mail_un, mail_pw, mail_host):
@@ -159,18 +169,25 @@ class Log:
         MAIL_PW = mail_pw
         MAIL_HOST = mail_host
 
-    @staticmethod
-    def set_mailto(mail_to):
+    def set_mailto(self, mail_to):
         """
-        set mail to
+        set mail to, call after set_mail
         """
         global MAIL_TO
         if isinstance(mail_to, str) or isinstance(mail_to, unicode):
             MAIL_TO = [mail_to]
         elif isinstance(mail_to, list):
             MAIL_TO = mail_to
-        else:
-            pass
+        # set mail configure
+        self.mh = OptmizedMemoryHandler(ERROR_MESSAGE, ERROR_MAIL_SUBJECT)
+        self.mh.setLevel(MEMOEY_LOG_LEVEL)
+        self.sh = logging.handlers.SMTPHandler(MAIL_HOST, MAIL_UN, ";".join(MAIL_TO), CRITICAL_MAIL_SUBJECT)
+        self.sh.setLevel(URGENT_LOG_LEVEL)
+        self.mh.setFormatter(self.formatter)
+        self.sh.setFormatter(self.formatter)
+        # add handler
+        self.logger.addHandler(self.mh)
+        self.logger.addHandler(self.sh)
 
     def set_error_limit(self, limit=50):
         """
@@ -181,7 +198,8 @@ class Log:
         global ERROR_MESSAGE
         ERROR_MESSAGE = limit
         # update deque max len
-        self.mh.buffer = deque(maxlen=ERROR_MESSAGE)
+        if self.mh:
+            self.mh.buffer = deque(maxlen=ERROR_MESSAGE)
 
     @staticmethod
     def set_error_window(window=0):
@@ -191,43 +209,29 @@ class Log:
     def set_log_level(self, log_level=logging.INFO):
         self.logger.setLevel(log_level)
 
-    def config(self, log_file, file_level, console_level, memory_level, urgent_level):
+    def config(self, log_file, file_level, console_level):
         """
         set log option
         :param log_file: log file path
         :param file_level: log level
         :param console_level:
-        :param memory_level:
-        :param urgent_level:
         :return:
         """
         # logger configure
-        self.logger = logging.getLogger()
         self.logger.setLevel(file_level)
         # log format
-        date_fmt = '%Y-%m-%d %H:%M:%S'
-        log_fmt = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(pathname)s] line:[%(lineno)d] %(message)s'
-        formatter = logging.Formatter(log_fmt, date_fmt)
         self.ch = logging.StreamHandler()
         self.ch.setLevel(console_level)
-        self.mh = OptmizedMemoryHandler(ERROR_MESSAGE, ERROR_MAIL_SUBJECT)
-        self.mh.setLevel(memory_level)
-        self.sh = logging.handlers.SMTPHandler(MAIL_HOST, MAIL_UN, ";".join(MAIL_TO), CRITICAL_MAIL_SUBJECT)
-        self.sh.setLevel(urgent_level)
-        self.ch.setFormatter(formatter)
-        self.mh.setFormatter(formatter)
-        self.sh.setFormatter(formatter)
-        # add handle
+        self.ch.setFormatter(self.formatter)
         self.logger.addHandler(self.ch)
-        self.logger.addHandler(self.mh)
-        self.logger.addHandler(self.sh)
+        # add handle
         if log_file:
             self.fh = logging.handlers.RotatingFileHandler(
                 log_file, mode='a', maxBytes=1024 * 1024 * 10,
                 backupCount=10, encoding="utf-8"
             )
             self.fh.setLevel(file_level)
-            self.fh.setFormatter(formatter)
+            self.fh.setFormatter(self.formatter)
             self.logger.addHandler(self.fh)
 
     def debug(self, msg):

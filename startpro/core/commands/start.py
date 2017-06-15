@@ -38,7 +38,7 @@ class Command(TopCommand):
                 script_name = scripts.keys()[int(script_name)]
             if script_name not in scripts:
                 raise RuntimeError('Unsupported script')
-        except:
+        except Exception:
             print('[ERROR]:Unsupported script.')
             return
         script = scripts[script_name]

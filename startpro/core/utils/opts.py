@@ -119,7 +119,7 @@ def __scan_mod(path):
                         func_name = "%s.%s" % (mod.__name__, item.__name__)
                         res.append({'name': func_name, 'func': item, 'is_class': False, 'path': mod.__name__})
                         # res.append((func_name, item, False, mod.__name__))
-            except:
+            except Exception:
                 s = sys.exc_info()
                 print("scan_mod {} on line {}".format(s[1], s[2].tb_lineno))
 
@@ -182,7 +182,7 @@ def save_script_temp(mapping):
                     pass
                 tmp_file.write('%s\n' % (json.dumps(v)))
             tmp_file.flush()
-    except:
+    except Exception:
         s = sys.exc_info()
         print('ERROR:save_script_temp %s on line %d' % (s[1], s[2].tb_lineno))
 

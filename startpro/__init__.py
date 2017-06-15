@@ -189,7 +189,7 @@ def execute(pkg=False):
             func.run(**opts)
         else:
             _print_commands(cmds)
-    except:
+    except Exception:
         s = sys.exc_info()
         msg = '[ERROR]:execute [{}] happened on line {}'.format(s[1], s[2].tb_lineno)
         print(msg)
