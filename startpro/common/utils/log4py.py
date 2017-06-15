@@ -189,7 +189,6 @@ class Log:
         ERROR_MESSAGE_WINDOW = window
 
     def set_log_level(self, log_level=logging.INFO):
-        print(log_level)
         self.logger.setLevel(log_level)
 
     def config(self, log_file, file_level, console_level, memory_level, urgent_level):
