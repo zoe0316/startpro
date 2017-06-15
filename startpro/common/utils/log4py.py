@@ -134,6 +134,7 @@ class Log:
         self.sh = None
         self._formatter = None
         self.logger = logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
 
     @property
     def formatter(self):
@@ -217,8 +218,6 @@ class Log:
         :param console_level:
         :return:
         """
-        # logger configure
-        self.logger.setLevel(file_level)
         # log format
         self.ch = logging.StreamHandler()
         self.ch.setLevel(console_level)
