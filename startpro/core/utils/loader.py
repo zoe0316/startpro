@@ -8,7 +8,7 @@ import os
 import sys
 import functools
 
-from startpro.common.utils.log4py import log
+from startpro.common.utils.log4py import base_log, log
 from startpro.core import settings
 from startpro.common.utils.config import Config
 
@@ -84,14 +84,16 @@ def loader(**kwargvs):
     # set log
     log_path = os.path.join(kwargvs.get('log_path', settings.ROOT_PATH), 'log')
     # set mail to address
-    log.set_mail(get_settings('mail_un', ''), get_settings('mail_pw', ''), get_settings('mail_host', ''))
-    log.set_mailto(get_settings('mail_to', '').split(','))
+    base_log.set_mail(get_settings('mail_un', ''), get_settings('mail_pw', ''), get_settings('mail_host', ''))
+    base_log.set_mailto(get_settings('mail_to', '').split(','))
     # set log error count limit
-    log.set_error_limit(int(get_settings('log_error_limit', 50)))
+    base_log.set_error_limit(int(get_settings('log_error_limit', 50)))
     # set log error time window to flush MemoryHandler
-    log.set_error_window(int(get_settings('log_error_window', 0)))
+    base_log.set_error_window(int(get_settings('log_error_window', 0)))
     # set log file name
-    log.set_logfile(kwargvs.get('log', None) or log_name, log_path)
+    base_log.set_logfile(kwargvs.get('log', None) or log_name, log_path)
+    # set log level
+    log.setLevel(get_settings('log_level', 'INFO'))
     log.info("init context : {}".format(script_name))
     # set process id
     pid_file = kwargvs.get('pid', None) or log_name

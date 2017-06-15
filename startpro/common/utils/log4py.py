@@ -81,10 +81,12 @@ class OptmizedMemoryHandler(logging.handlers.MemoryHandler):
                 content = []
                 for r in self.buffer:
                     record = r['record']
-                    message = record.getMessage()
-                    level = record.levelname
-                    t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))
-                    content.append('{} * {} * : {}'.format(t, level, message))
+                    msg = self.format(record)
+                    # message = record.getMessage()
+                    # level = record.levelname
+                    # t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(record.created))
+                    # content.append('{} * {} * : {}'.format(t, level, message))
+                    content.append(msg)
                 if content:
                     self.notify(self.mail_subject, '\n'.join(content))
                 # clear buffer
@@ -186,6 +188,9 @@ class Log:
         global ERROR_MESSAGE_WINDOW
         ERROR_MESSAGE_WINDOW = window
 
+    def set_log_level(self, log_level=logging.INFO):
+        self.logger.setLevel(log_level)
+
     def config(self, log_file, file_level, console_level, memory_level, urgent_level):
         """
         set log option
@@ -201,7 +206,7 @@ class Log:
         self.logger.setLevel(file_level)
         # log format
         date_fmt = '%Y-%m-%d %H:%M:%S'
-        log_fmt = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(filename)s] line:[%(lineno)d] %(message)s'
+        log_fmt = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(pathname)s] line:[%(lineno)d] %(message)s'
         formatter = logging.Formatter(log_fmt, date_fmt)
         self.ch = logging.StreamHandler()
         self.ch.setLevel(console_level)
@@ -246,4 +251,5 @@ class Log:
             self.logger.critical(msg)
 
 
-log = Log()
+base_log = Log()
+log = logging.getLogger(__name__)
