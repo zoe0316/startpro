@@ -215,8 +215,8 @@ def get_exec_func(mod, name, is_class=True):
         item = getattr(mod, item)
         if is_class:
             if isclass(item) and issubclass(item, Process):
-                cls = item()
-                if hasattr(cls, 'name') and cls.name.endswith(name):
+                if hasattr(item, 'name') and item.name.endswith(name):
+                    cls = item()
                     func = cls.run
         else:
             name = name.split('.')[-1]
