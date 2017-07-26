@@ -7,7 +7,7 @@ Created on 2014.04.21
 """
 
 
-class TopCommand():
+class TopCommand(object):
 
     def __init__(self):
         """

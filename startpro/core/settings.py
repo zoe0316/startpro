@@ -7,7 +7,7 @@ Created on 2014.04.21
 """
 import os
 
-COMMAND_MODEULE = 'startpro.core.commands'
+COMMAND_MODULE = 'startpro.core.commands'
 
 SCRIPT_MODULE = ''
 

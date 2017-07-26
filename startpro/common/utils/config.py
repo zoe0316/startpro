@@ -31,12 +31,14 @@ class Config(object):
     def __init_config(self):
         try:
             if not os.path.exists(self.config_file):
-                # new config file
-                f = file(self.config_file, "w")
-                f.close()
+                # touch config file
+                # os.mknod(self.config_file)
+                with open(self.config_file, 'w') as tmp_file:
+                    pass
             self.config.read(self.config_file)
-        except Exception as e:
-            print(e)
+        except Exception:
+            s = sys.exc_info()
+            print('[ERROR]:__init_config %s on line %d.' % (s[1], s[2].tb_lineno))
 
     def set_config(self, section, option, value):
         """
@@ -54,8 +56,9 @@ class Config(object):
             self.config.set(section, option, value)
             self.config.write(open(self.config_file, "w"))
             return True
-        except Exception as e:
-            print(e)
+        except Exception:
+            s = sys.exc_info()
+            print('[ERROR]:set_config %s on line %d.' % (s[1], s[2].tb_lineno))
             return False
 
     def get_config(self, section, option):
@@ -72,8 +75,9 @@ class Config(object):
             if not self.config.has_option(section, option):
                 return config_val
             config_val = self.config.get(section, option)
-        except Exception as e:
-            print(e)
+        except Exception:
+            s = sys.exc_info()
+            print('[ERROR]:get_config %s on line %d.' % (s[1], s[2].tb_lineno))
             return ''
         return str(config_val).strip()
 
@@ -87,8 +91,9 @@ class Config(object):
         try:
             if self.config.has_section(section):
                 configs = self.config.items(section)
-        except Exception as e:
-            print(e)
+        except Exception:
+            s = sys.exc_info()
+            print('[ERROR]:get_config_list %s on line %d.' % (s[1], s[2].tb_lineno))
         return configs
 
     def remove_option(self, section, option):
@@ -102,5 +107,7 @@ class Config(object):
             self.config.remove_option(section, option)
             self.config.write(open(self.config_file, "w"))
             return True
-        except:
+        except Exception:
+            s = sys.exc_info()
+            print('[ERROR]:remove_option %s on line %d.' % (s[1], s[2].tb_lineno))
             return False

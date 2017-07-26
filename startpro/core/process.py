@@ -12,7 +12,7 @@ class Process(object):
         pass
 
     def start(self):
-        raise NotImplementedError
+        pass
 
     def run(self, **kwargvs):
         raise NotImplementedError

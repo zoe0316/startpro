@@ -24,17 +24,24 @@ options['-e'] = "package functions exclude(if more than one, split by comma)"
 # fix to hooks collect
 options['-add-data'] = "py-installer add-data string [such:'SRC:DEST,SRC:DEST']"
 
-SPEC_CONTENT = '''
-# -*- mode: python -*-
+SPEC_CONTENT = '''# -*- mode: python -*-
+
+block_cipher = None
+
 a = Analysis(['#PY_NAME#'],
              pathex=['#PATHEX#'],
+             binaries=[],
+             datas=#DATA_FILE#,
              hiddenimports=[],
-             hookspath=None,
-             runtime_hooks=None)
-             
-pyz = PYZ(a.pure)
-
-a.datas = #DATA_FILE#
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher
+             )
 
 exe = EXE(pyz,
           a.scripts,
@@ -66,6 +73,7 @@ class Command(TopCommand):
                     name = settings.CONFIG.get_config('package', 'name')  # @UndefinedVariable
             if not name:
                 return
+            print('[INFO]:package name:{0}'.format(name))
             py_name = "%s.py" % name
             path_ex = os.getcwd()
             # main PY
@@ -92,17 +100,18 @@ class Command(TopCommand):
             else:
                 load_paths = kwargvs['load_paths']
             for r in load_paths:
-                print('include:[%s]' % r)
+                print('[INFO]:include:[%s]' % r)
             self.update(dst, ["import %s" % r for r in load_paths])
             # configure
             cfg = os.path.join(path_ex, settings.MAIN_CONFIG)
-            settings.CONFIG.set_config("package", "load", str(kwargvs.get('paths', '')))  # @UndefinedVariable
+            settings.CONFIG.set_config("package", "load", str(kwargvs.get('paths', '')))
+            print('[INFO]:package set load:{0}'.format(kwargvs.get('paths')))
             # py installer
             pkg_name = name
             data_file = [
-                ('/startpro/VERSION', os.path.join(src, 'VERSION'), 'DATA'),
-                ('/startpro/startpro.cfg', cfg, 'DATA'),
-                ('/startpro/template/package.py', path, 'DATA')
+                (os.path.join(src, 'VERSION'), 'startpro'),
+                (cfg, 'startpro'),
+                (path, 'startpro/template/package.py')
             ]
             # update extend hooks
             more_file = kwargvs.get('add-data', '').strip()
@@ -110,22 +119,24 @@ class Command(TopCommand):
             if more_file:
                 for r in more_file.split(','):
                     r = r.split(':')
-                    data_file.append((r[1], r[0], 'DATA'))
+                    data_file.append((r[0], r[1]))
             global SPEC_CONTENT
-            SPEC_CONTENT = SPEC_CONTENT.replace("#PY_NAME#", py_name).replace("#PATHEX#", path_ex). \
-                replace("#DATA_FILE#", str(data_file)).replace("#PKG_NAME#", pkg_name)
+            SPEC_CONTENT = SPEC_CONTENT.replace("#PY_NAME#", py_name)
+            SPEC_CONTENT = SPEC_CONTENT.replace("#PATHEX#", path_ex)
+            SPEC_CONTENT = SPEC_CONTENT.replace("#DATA_FILE#", str(data_file))
+            SPEC_CONTENT = SPEC_CONTENT.replace("#PKG_NAME#", pkg_name)
             spec = dst.replace(".py", ".spec")
             with open(spec, 'w') as f:
                 f.write(SPEC_CONTENT)
                 f.flush()
             os.system("pyinstaller -F {}".format(spec))
             settings.CONFIG.remove_option("package", "load")
+            print('[INFO]:package clean load')
             # os.remove(spec)
             print("[INFO]:package:[%s]" % os.path.join(os.path.join(path_ex, "dist"), pkg_name))
-        except Exception as e:
-            print("[ERROR]:%s" % e)
+        except Exception:
             s = sys.exc_info()
-            print('pkg %s on line %d.' % (s[1], s[2].tb_lineno))
+            print('[ERROR]:pkg %s on line %d.' % (s[1], s[2].tb_lineno))
 
     @staticmethod
     def update(main_py, res):

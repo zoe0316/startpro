@@ -175,7 +175,7 @@ class Log:
         set mail to, call after set_mail
         """
         global MAIL_TO
-        if isinstance(mail_to, str) or isinstance(mail_to, unicode):
+        if isinstance(mail_to, str):
             MAIL_TO = [mail_to]
         elif isinstance(mail_to, list):
             MAIL_TO = mail_to

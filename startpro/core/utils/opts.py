@@ -68,7 +68,7 @@ def load_module(module_path, match=""):
     if module_path:
         try:
             # match
-            match = [settings.COMMAND_MODEULE]
+            match = [settings.COMMAND_MODULE]
             config = settings.CONFIG
             if config:
                 match.extend(config.get_config('settings', 'default').split(","))

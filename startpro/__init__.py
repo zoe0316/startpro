@@ -36,7 +36,6 @@ if sys.version_info < (3, 4):
     reload(sys)
     sys.setdefaultencoding('utf8')  # @UndefinedVariable
 
-
 __version__ = pkgutil.get_data('startpro', 'VERSION')
 if not isinstance(__version__, str):
     __version__ = __version__.decode('utf8')
@@ -131,13 +130,16 @@ def pkg_run(curr_path, opts):
     :param opts:
     :return:
     """
-    match = _start(curr_path)
-    paths = settings.CONFIG.get_config("package", "load")
-    paths = json.loads(paths.replace("'", '"'))
-    # load_paths = load_modeule_auto("", paths)
-    opts['paths'] = paths
-    opts['load_paths'] = paths
-    return match
+    try:
+        match = _start(curr_path)
+        paths = settings.CONFIG.get_config("package", "load")
+        paths = json.loads(paths.replace("'", '"'))
+        opts['paths'] = paths
+        opts['load_paths'] = paths
+        return match
+    except Exception:
+        s = sys.exc_info()
+        print("[ERROR]:pkg_run %s happened on line %d" % (s[1], s[2].tb_lineno))
 
 
 def normal_run(curr_path, opts):
@@ -147,15 +149,19 @@ def normal_run(curr_path, opts):
     :param opts:
     :return:
     """
-    match = _start(curr_path)
-    paths = []
-    for m in match.split(","):
-        for r in glob.glob(os.path.join(curr_path, m)):
-            paths.append(os.path.basename(r))
-    load_paths = load_module_auto(curr_path, paths)
-    opts['paths'] = paths
-    opts['load_paths'] = load_paths
-    return match
+    try:
+        match = _start(curr_path)
+        paths = []
+        for m in match.split(","):
+            for r in glob.glob(os.path.join(curr_path, m)):
+                paths.append(os.path.basename(r))
+        load_paths = load_module_auto(curr_path, paths)
+        opts['paths'] = paths
+        opts['load_paths'] = load_paths
+        return match
+    except Exception:
+        s = sys.exc_info()
+        print("[ERROR]:normal_run %s happened on line %d" % (s[1], s[2].tb_lineno))
 
 
 def execute(pkg=False):
@@ -164,32 +170,27 @@ def execute(pkg=False):
     :param pkg:
     :return:
     """
-    try:
-        cmds = get_command([settings.COMMAND_MODEULE])
-        if len(sys.argv) > 1:
-            name = sys.argv[1]
-            opts = get_opts(sys.argv)
-            func = cmds.get(name)
-            if not func:
-                print("[INFO]:Unsupported command.\n")
-                _print_commands(cmds)
-                return
-            curr_path = os.getcwd()
-            sys.path.append(curr_path)
-            if name not in ['create', 'start']:
-                if pkg:
-                    if not pkg_run(__path__[0], opts):
-                        return
-                else:
-                    if not normal_run(curr_path, opts):
-                        return
-            if "-h" in opts or "-help" in opts or "--help" in opts:
-                func.help(**opts)
-                return
-            func.run(**opts)
-        else:
+    cmds = get_command([settings.COMMAND_MODULE])
+    if len(sys.argv) > 1:
+        name = sys.argv[1]
+        opts = get_opts(sys.argv)
+        func = cmds.get(name)
+        if not func:
+            print("[INFO]:Unsupported command.\n")
             _print_commands(cmds)
-    except Exception:
-        s = sys.exc_info()
-        msg = '[ERROR]:execute [{}] happened on line {}'.format(s[1], s[2].tb_lineno)
-        print(msg)
+            return
+        curr_path = os.getcwd()
+        sys.path.append(curr_path)
+        if name not in ['create', 'start']:
+            if pkg:
+                if not pkg_run(__path__[0], opts):
+                    return
+            else:
+                if not normal_run(curr_path, opts):
+                    return
+        if "-h" in opts or "-help" in opts or "--help" in opts:
+            func.help(**opts)
+            return
+        func.run(**opts)
+    else:
+        _print_commands(cmds)
