@@ -38,3 +38,6 @@ LOAD_PATHS = '#LOAD_PATHS#'
 
 # TAMP FILE
 SCRIPT_TEMP = '.scripts.tmp'
+
+# LOAD FLAG
+HAS_LOAD = False

@@ -24,7 +24,7 @@ class Command(TopCommand):
         Constructor
         """
 
-    def run(self, **kwargvs):
+    def run(self, **kwargs):
         if len(sys.argv) < 3:
             print('[WARN]:need start script name.')
             return
@@ -44,7 +44,7 @@ class Command(TopCommand):
         script = scripts[script_name]
         mod = import_module(script['path'])
         func = get_exec_func(mod=mod, name=script_name, is_class=script['is_class'])
-        func(**kwargvs)
+        func(**kwargs)
 
     def help(self, **kwargvs):
         print('Start a program.')

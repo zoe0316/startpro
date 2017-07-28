@@ -25,14 +25,14 @@ class Command(TopCommand):
         Constructor
         """
 
-    def run(self, **kwargvs):
+    def run(self, **kwargs):
         try:
-            if not kwargvs.get('name', None):
+            if not kwargs.get('name', None):
                 print("[WARN]:create a project by argument '-name [value]'.")
                 return None
             mod = import_module(MAIN_PATH)
             src = mod.__path__[0]
-            dst = os.path.join(os.getcwd(), kwargvs['name'])
+            dst = os.path.join(os.getcwd(), kwargs['name'])
             if not os.path.exists(dst):
                 os.mkdir(dst)
             else:

@@ -62,12 +62,12 @@ class Command(TopCommand):
         Constructor
         """
 
-    def run(self, **kwargvs):
+    def run(self, **kwargs):
         try:
             mod = import_module(MAIN_PATH)
             src = mod.__path__[0]
             path = os.path.join(src, TEMPLATE_PACKAGE)
-            name = kwargvs.get('name', None)
+            name = kwargs.get('name', None)
             if not name:
                 if settings.CONFIG:
                     name = settings.CONFIG.get_config('package', 'name')  # @UndefinedVariable
@@ -80,8 +80,8 @@ class Command(TopCommand):
             dst = os.path.join(path_ex, py_name)
             shutil.copyfile(path, dst)
             patterns = []
-            include_regex = [(r, True) for r in filter(lambda x: x, kwargvs.get('i', '').split(','))]
-            exclude_regex = [(r, False) for r in filter(lambda x: x, kwargvs.get('e', '').split(','))]
+            include_regex = [(r, True) for r in filter(lambda x: x, kwargs.get('i', '').split(','))]
+            exclude_regex = [(r, False) for r in filter(lambda x: x, kwargs.get('e', '').split(','))]
             patterns.extend(include_regex)
             patterns.extend(exclude_regex)
             if patterns:
@@ -98,14 +98,14 @@ class Command(TopCommand):
                             else:
                                 break
             else:
-                load_paths = kwargvs['load_paths']
+                load_paths = kwargs['load_paths']
             for r in load_paths:
                 print('[INFO]:include:[%s]' % r)
             self.update(dst, ["import %s" % r for r in load_paths])
             # configure
             cfg = os.path.join(path_ex, settings.MAIN_CONFIG)
-            settings.CONFIG.set_config("package", "load", str(kwargvs.get('paths', '')))
-            print('[INFO]:package set load:{0}'.format(kwargvs.get('paths')))
+            settings.CONFIG.set_config("package", "load", str(kwargs.get('paths', '')))
+            print('[INFO]:package set load:{0}'.format(kwargs.get('paths')))
             # py installer
             pkg_name = name
             data_file = [
@@ -114,7 +114,7 @@ class Command(TopCommand):
                 (path, 'startpro/template/package.py')
             ]
             # update extend hooks
-            more_file = kwargvs.get('add-data', '').strip()
+            more_file = kwargs.get('add-data', '').strip()
             # parse add-file
             if more_file:
                 for r in more_file.split(','):

@@ -27,14 +27,14 @@ class Command(TopCommand):
         Constructor
         """
 
-    def run(self, **kwargvs):
+    def run(self, **kwargs):
         scripts = enumerate(sorted(
-            get_script(kwargvs.get('paths', []), bool(kwargvs.get('full', False)), kwargvs.get('choose', None)).keys()))
+            get_script(kwargs.get('paths', []), bool(kwargs.get('full', False)), kwargs.get('choose', None)).keys()))
         print('[INFO]:script list:')
         for i, k in scripts:
             print('----> %d: %s' % (i, k))
 
-    def help(self, **kwargvs):
+    def help(self, **kwargs):
         print('Lists all program.')
         print('')
         print("Available options:")

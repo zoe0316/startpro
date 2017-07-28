@@ -14,5 +14,5 @@ class Process(object):
     def start(self):
         pass
 
-    def run(self, **kwargvs):
+    def run(self, **kwargs):
         raise NotImplementedError

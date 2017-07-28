@@ -11,11 +11,11 @@ import logging.handlers
 from collections import deque
 from email.mime.text import MIMEText
 
-FILE_LOG_LEVEL = logging.INFO
+FILE_LOG_LEVEL = logging.DEBUG
 
 CONSOLE_LOG_LEVEL = logging.ERROR
 
-MEMOEY_LOG_LEVEL = logging.ERROR
+MEMORY_LOG_LEVEL = logging.ERROR
 
 URGENT_LOG_LEVEL = logging.CRITICAL
 
@@ -181,7 +181,7 @@ class Log:
             MAIL_TO = mail_to
         # set mail configure
         self.mh = OptmizedMemoryHandler(ERROR_MESSAGE, ERROR_MAIL_SUBJECT)
-        self.mh.setLevel(MEMOEY_LOG_LEVEL)
+        self.mh.setLevel(MEMORY_LOG_LEVEL)
         self.sh = logging.handlers.SMTPHandler(MAIL_HOST, MAIL_UN, ";".join(MAIL_TO), CRITICAL_MAIL_SUBJECT)
         self.sh.setLevel(URGENT_LOG_LEVEL)
         self.mh.setFormatter(self.formatter)

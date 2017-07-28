@@ -15,10 +15,10 @@ class TopCommand(object):
         """
         pass
 
-    def run(self, **kwargvs):
+    def run(self, **kwargs):
         raise NotImplementedError
 
-    def help(self, **kwargvs):
+    def help(self, **kwargs):
         """
         print help info.
         """

@@ -167,7 +167,7 @@ def get_command(paths):
 def save_script_temp(mapping):
     """
     save script list to temp file
-    :param res:
+    :param mapping:
     :return:
     """
     try:
