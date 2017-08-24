@@ -32,9 +32,8 @@ class Config(object):
         try:
             if not os.path.exists(self.config_file):
                 # touch config file
-                # os.mknod(self.config_file)
                 with open(self.config_file, 'w') as tmp_file:
-                    pass
+                    tmp_file.flush()
             self.config.read(self.config_file)
         except Exception:
             s = sys.exc_info()
@@ -54,7 +53,8 @@ class Config(object):
                 # check
                 self.config.add_section(section)
             self.config.set(section, option, value)
-            self.config.write(open(self.config_file, "w"))
+            with open(self.config_file, "w") as cfg_file:
+                self.config.write(cfg_file)
             return True
         except Exception:
             s = sys.exc_info()
@@ -105,7 +105,8 @@ class Config(object):
         """
         try:
             self.config.remove_option(section, option)
-            self.config.write(open(self.config_file, "w"))
+            with open(self.config_file, "w") as cfg_file:
+                self.config.write(cfg_file)
             return True
         except Exception:
             s = sys.exc_info()

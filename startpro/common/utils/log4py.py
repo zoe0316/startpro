@@ -40,7 +40,7 @@ MAIL_PW = ""
 
 # log format
 FMT_DATE = '%Y-%m-%d %H:%M:%S'
-FMT_LINE = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(pathname)s] line:[%(lineno)d] %(message)s'
+FMT_LINE = '%(asctime)-15s [%(levelname)s] p:[%(process)d] file:[%(filename)s] line:[%(lineno)d] %(message)s'
 
 
 class OptmizedMemoryHandler(logging.handlers.MemoryHandler):

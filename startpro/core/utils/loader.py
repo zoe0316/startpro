@@ -79,7 +79,9 @@ def loader(**kwargs):
     # set log file name
     base_log.set_logfile(kwargs.get('log', None) or log_name, log_path)
     # set log level
-    log.setLevel(get_settings('log_level', 'INFO'))
+    log_level = get_settings('log_level', 'INFO')
+    base_log.logger.setLevel(log_level)
+    log.setLevel(log_level)
     log.info("init context : {}".format(script_name))
     # set process id
     pid_file = kwargs.get('pid', None) or log_name
