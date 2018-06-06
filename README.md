@@ -61,7 +61,7 @@ startpro [command] -help
 #### Build a project
 
 ```shell
-startpro cretae -name pro
+startpro create -name pro
 ```
 
 #### Settings
