@@ -5,10 +5,6 @@ from setuptools import find_packages
 with open(os.path.join(os.path.dirname(__file__), 'startpro/VERSION')) as f:
     version = f.read().strip()
 
-scripts = ['bin/startpro']
-if os.name == 'nt':
-    scripts.append('bin/startpro.bat')
-
 setup_args = {
     'name': 'startpro',
     'version': version,
@@ -19,7 +15,6 @@ setup_args = {
     'author_email': 'zoe0316@live.cn',
     'maintainer': '',
     'maintainer_email': '',
-    'scripts': scripts,
     'license': 'BSD',
     'include_package_data': True,
     'classifiers': [
@@ -39,7 +34,12 @@ setup_args = {
         'Intended Audience :: Developers',
         'Environment :: Console',
         'Topic :: Software Development :: Libraries :: Python Modules',
-    ]
+    ],
+    "entry_points": {
+        "console_scripts": [
+            "startpro = startpro.__init__:execute",
+        ],
+    }
 }
 
 try:

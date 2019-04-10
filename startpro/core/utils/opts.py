@@ -5,14 +5,13 @@ Created on 2014.04.16
 
 @author: Allen
 """
-from collections import OrderedDict
-from importlib import import_module
-from inspect import isclass, ismodule, isfunction
-import json
 import os
 import re
 import sys
-
+import json
+from collections import OrderedDict
+from importlib import import_module
+from inspect import isclass, ismodule, isfunction
 from startpro.core import settings
 from startpro.core.process import Process
 from startpro.core.topcmd import TopCommand
@@ -68,7 +67,7 @@ def load_module(module_path, match=""):
     if module_path:
         try:
             # match
-            match = [settings.COMMAND_MODULE]
+            match = [match or settings.COMMAND_MODULE]
             config = settings.CONFIG
             if config:
                 match.extend(config.get_config('settings', 'default').split(","))
@@ -77,10 +76,9 @@ def load_module(module_path, match=""):
             if not p.match(module_path):
                 return mods
             mod = import_module(module_path)
-            for module in dir(mod):
-                # if module_path.startswith(settings.COMMAND_MODEULE) or module_path.startswith(settings.SCRIPT_MODULE):
-                if not module.startswith('__'):
-                    mods.append(import_module("{}.{}".format(module_path, module)))
+            for m in dir(mod):
+                if not m.startswith('__'):
+                    mods.append(import_module("{}.{}".format(module_path, m)))
         except Exception as e:
             print("load_module:{} at:{}".format(e, module_path))
     return mods
@@ -142,7 +140,7 @@ def get_script(paths, full=False, choose=None):
     if choose:
         for key in set(mapping.keys()):
             if key.split(".")[0] not in choose.split(','):
-                del(mapping[key])
+                del (mapping[key])
     # save script list to temp file
     save_script_temp(mapping)
     return mapping
