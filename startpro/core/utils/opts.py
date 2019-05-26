@@ -35,7 +35,13 @@ def get_opts(argv):
 def load_module_auto(root_path, scan_paths):
     paths = set()
     for p in scan_paths:
-        for root, _, files in os.walk(import_module(p).__path__[0]):
+        m = import_module(p).__path__
+        walk_dirs = []
+        if isinstance(m, list):
+            walk_dirs = m
+        else:
+            walk_dirs = m._path
+        for root, _, files in os.walk(walk_dirs[0]):
             for f in files:
                 try:
                     if f.startswith("__") or f.endswith("pyc") or not f.endswith(".py"):
