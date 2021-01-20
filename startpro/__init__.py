@@ -18,7 +18,7 @@ from shutil import ignore_patterns
 import glob
 
 from startpro.common.utils.config import Config
-from startpro.core.utils.opts import get_command
+from startpro.core.utils.opts import get_command, load_script_temp, get_script
 from startpro.core import settings
 from startpro.core.utils.opts import load_module_auto, get_opts
 
@@ -108,17 +108,9 @@ def _start(root_path):
     """
     try:
         path = os.path.join(root_path, settings.MAIN_CONFIG)
-        if not os.path.exists(path):
-            print("[WARN]:[{}] not found.".format(path))
-            return
         config = Config(path)
         settings.CONFIG = config
-        script = config.get_config('settings', 'default')
-        if script:
-            return script
-        else:
-            print("[WARN]:[{}] not found in [{}].".format('default script module name', path))
-            return
+        return config.get_config('settings', 'default')
     except Exception as e:
         print(e)
 
@@ -154,7 +146,11 @@ def normal_run(curr_path, opts):
         paths = []
         for m in match.split(","):
             for r in glob.glob(os.path.join(curr_path, m)):
+                if not os.path.isdir(r):
+                    continue
                 paths.append(os.path.basename(r))
+        if settings.CONFIG.get_config('settings', 'default') == "*":
+            settings.CONFIG.set_config('settings', 'default', ",".join(paths))
         load_paths = load_module_auto(curr_path, paths)
         opts['paths'] = paths
         opts['load_paths'] = load_paths
@@ -164,33 +160,54 @@ def normal_run(curr_path, opts):
         print("[ERROR]:normal_run %s happened on line %d" % (s[1], s[2].tb_lineno))
 
 
+def set_load_path(pkg, curr_path, opts):
+    if pkg:
+        return pkg_run(__path__[0], opts)
+    return normal_run(curr_path, opts)
+
+
+def detect_entry(pkg, curr_path, opts):
+    scripts = load_script_temp()
+    if not scripts and set_load_path(pkg, curr_path, opts):
+        # auto generate script tmp file
+        scripts = get_script(opts.get('paths', []))
+    return scripts
+
+
 def execute(pkg=False):
     """
     main process
     :param pkg:
     :return:
     """
-    cmds = get_command([settings.COMMAND_MODULE])
-    if len(sys.argv) > 1:
-        name = sys.argv[1]
-        opts = get_opts(sys.argv)
-        func = cmds.get(name)
-        if not func:
+    cmd = get_command([settings.COMMAND_MODULE])
+    if len(sys.argv) <= 1:
+        _print_commands(cmd)
+        return
+    name = sys.argv[1]
+    opts = get_opts(sys.argv)
+    func = cmd.get(name)
+    curr_path = os.getcwd()
+    sys.path.append(curr_path)
+    if not func:
+        scripts = detect_entry(pkg, curr_path, opts)
+        if name not in scripts:
             print("[INFO]:Unsupported command.\n")
-            _print_commands(cmds)
+            _print_commands(cmd)
             return
-        curr_path = os.getcwd()
-        sys.path.append(curr_path)
-        if name not in ['create', 'start']:
-            if pkg:
-                if not pkg_run(__path__[0], opts):
-                    return
-            else:
-                if not normal_run(curr_path, opts):
-                    return
-        if "-h" in opts or "-help" in opts or "--help" in opts:
-            func.help(**opts)
-            return
+        func = cmd.get("start")
+        opts["script_name"] = name
+    if "-h" in opts or "-help" in opts or "--help" in opts:
+        func.help(**opts)
+        return
+    if name == "create":
         func.run(**opts)
-    else:
-        _print_commands(cmds)
+        return
+    if name == "start":
+        detect_entry(pkg, curr_path, opts)
+        opts["script_name"] = str(sys.argv[2])
+        func.run(**opts)
+        return
+    # list and pkg
+    if set_load_path(pkg, curr_path, opts):
+        func.run(**opts)

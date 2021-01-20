@@ -15,6 +15,29 @@ else:
 
 class Config(object):
     """
+    Notice: ConfigParser will delete comment lines when write config
+    """
+
+    default_config = '''# Automatically created by: startpro
+#
+# For more information about the section see:
+# https://github.com/zoe0316/startpro
+
+[settings]
+# Base settings
+
+# execute module match pattern name
+# default = script
+# default = rest,db,web
+# default = script*
+default = *
+
+[package]
+name = main
+
+'''
+
+    """
     parse config file
     """
 
@@ -33,6 +56,7 @@ class Config(object):
             if not os.path.exists(self.config_file):
                 # touch config file
                 with open(self.config_file, 'w') as tmp_file:
+                    tmp_file.write(self.default_config)
                     tmp_file.flush()
             self.config.read(self.config_file)
         except Exception:

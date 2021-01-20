@@ -5,7 +5,6 @@ Created on 2014.05.26
 
 @author: Allen
 """
-import sys
 from importlib import import_module
 
 from startpro.core.topcmd import TopCommand
@@ -25,10 +24,11 @@ class Command(TopCommand):
         """
 
     def run(self, **kwargs):
-        if len(sys.argv) < 3:
+        # str(sys.argv[2])
+        if "script_name" not in kwargs:
             print('[WARN]:need start script name.')
             return
-        script_name = str(sys.argv[2])
+        script_name = kwargs["script_name"]
         scripts = load_script_temp()
         if not scripts:
             print('[INFO]:please execute command [startpro list] first')

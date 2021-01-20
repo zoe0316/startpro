@@ -19,7 +19,7 @@ options = {"-full": "if need full path name of script",
 
 class Command(TopCommand):
     """
-    classdocs
+    list command
     """
 
     def __init__(self):

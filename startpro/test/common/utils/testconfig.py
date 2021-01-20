@@ -22,10 +22,10 @@ class Test(unittest.TestCase):
         assert self.config.set_config("common", "host", "127.0.0.1")
 
     def test_get_config(self):
-        print self.config.get_config('common', 'host')
+        print(self.config.get_config('common', 'host'))
 
     def test_get_config_list(self):
-        print self.config.get_config_list('common')
+        print(self.config.get_config_list('common'))
 
 
 if __name__ == "__main__":
